@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track Order</title>
+  <link rel="stylesheet" href="{% static 'css/frontend.css' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+  <style>
+    body { padding-top: 90px; background: #f7f7f4; }
+    .tracking-page { max-width: 760px; margin: 0 auto; }
+    .tracking-card { background: #fff; border: 1px solid #e5e5df; border-radius: 8px; padding: 30px; }
+    .tracking-meta { color: #6d6d68; }
+    .tracking-line { position: relative; margin: 32px 0 16px; }
+    .tracking-line::before { content: ''; position: absolute; left: 16px; top: 14px; bottom: 14px; width: 3px; background: #e8e8e3; }
+    .tracking-step { position: relative; display: flex; align-items: center; gap: 16px; min-height: 62px; color: #888; }
+    .tracking-step.active { color: #222; }
+    .tracking-dot { z-index: 1; width: 34px; height: 34px; border-radius: 50%; background: #e8e8e3; display: grid; place-items: center; color: #fff; }
+    .tracking-step.active .tracking-dot { background: coral; }
+    .tracking-step.current { font-weight: 700; }
+    .tracking-step.current .tracking-dot { box-shadow: 0 0 0 5px #ffe5dc; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-white py-3 fixed-top">
+    <div class="container-fluid">
+      <span class="brand-mark" aria-label="ShopEase"><img class="brand-logo" src="{% static 'images/logo1.png' %}" alt="ShopEase logo"><span class="brand-title">ShopEase</span></span>
+      <div class="ml-auto">
+        <a href="{% url 'frontend' %}" class="nav-link d-inline-block">Home</a>
+        <a href="{% url 'shop' %}" class="nav-link d-inline-block">Shop</a>
+        <a href="{% url 'contactus' %}" class="nav-link d-inline-block">Contact Us</a>
+        <a href="{% url 'cart' %}" class="nav-link d-inline-block" style="position: relative;" aria-label="Shopping cart"><i class="bx bxs-shopping-bag"></i><span id="cart-count" class="badge badge-danger" style="position: absolute; top: 5px; right: 5px; display: none;">0</span></a>
+        <a href="{% url 'orders' %}" class="nav-link d-inline-block" aria-label="My orders"><i class="bx bx-receipt"></i></a>
+        <a href="{% url 'user' %}" class="nav-link d-inline-block" aria-label="User profile"><i class="bx bxs-user-circle"></i></a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container tracking-page my-5">
+    <section class="tracking-card">
+      <div class="d-flex justify-content-between align-items-start flex-wrap">
+        <div>
+          <h1 class="h3 mb-2">Track your delivery</h1>
+          <p class="tracking-meta mb-1">Order #{{ order.id|slice:"-8:" }}</p>
+          <p class="tracking-meta">Tracking number: {{ order.tracking_number }}</p>
+        </div>
+        <span class="badge badge-success p-2">{{ order.status }}</span>
+      </div>
+
+      <div class="alert alert-light border mt-4">
+        <strong>Expected delivery:</strong> {{ order.expected_delivery|date:"l, d M Y" }}<br>
+        <span class="text-muted">Delivering to {{ order.address.city }}, {{ order.address.country }}</span>
+      </div>
+
+      <div class="tracking-line">
+        {% for step in tracking_steps %}
+          <div class="tracking-step {% if forloop.counter0 <= current_step %}active{% endif %} {% if forloop.counter0 == current_step %}current{% endif %}">
+            <span class="tracking-dot"><i class="bx {% if forloop.counter0 == 0 %}bx-loader{% elif forloop.counter0 == 1 %}bx-package{% elif forloop.counter0 == 2 %}bx-transfer{% elif forloop.counter0 == 3 %}bx-car{% else %}bx-check{% endif %}"></i></span>
+            <span>{{ step }}</span>
+          </div>
+        {% endfor %}
+      </div>
+
+      <a href="{% url 'orders' %}" class="btn btn-outline-secondary">Back to My Orders</a>
+    </section>
+  </main>
+  <script>
+    const cartStorageKey = "cart_{{ request.session.user_id|default:'guest' }}";
+    const cart = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
+    const cartCount = document.getElementById('cart-count');
+    cartCount.textContent = cart.length;
+    cartCount.style.display = cart.length ? 'block' : 'none';
+  </script>
+</body>
+</html>

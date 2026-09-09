@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <main class="login-wrapper">
+        <section class="login-card">
+            <h1>Create Account</h1>
+            <p class="subtitle">Register to get started</p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST" id="registerForm">
+                {% csrf_token %}
+
+                <div class="input-box">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username"
+                           placeholder="Enter your username" required>
+                    <i class="bx bx-user"></i>
+                </div>
+                <p class="feedback" id="usernameFeedback"></p>
+
+                <div class="input-box">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email"
+                           placeholder="Enter your email" required>
+                    <i class="bx bx-envelope"></i>
+                </div>
+                <p class="feedback" id="emailFeedback"></p>
+
+                <div class="input-box">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password"
+                           minlength="6" placeholder="Minimum 6 characters" required>
+                    <button type="button" class="toggle-password"
+                            onclick="togglePassword('password', 'passwordIcon')">
+                        <i class="bx bx-hide" id="passwordIcon"></i>
+                    </button>
+                </div>
+                <p class="feedback" id="passwordFeedback"></p>
+
+                <div class="input-box">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword"
+                           name="confirm_password"
+                           placeholder="Confirm your password" required>
+                    <button type="button" class="toggle-password"
+                            onclick="togglePassword('confirmPassword', 'confirmIcon')">
+                        <i class="bx bx-hide" id="confirmIcon"></i>
+                    </button>
+                </div>
+                <p class="feedback" id="confirmFeedback"></p>
+
+                <button class="login-button" type="submit" id="registerButton">
+                    <span>Register</span>
+                    <i class="bx bx-user-plus"></i>
+                </button>
+            </form>
+
+            <p class="register-text">
+                Already have an account?
+                <a href="{% url 'login' %}">Login here</a>
+            </p>
+        </section>
+    </main>
+
+    <script>
+        const username = document.getElementById("username");
+        const email = document.getElementById("email");
+        const password = document.getElementById("password");
+        const confirmPassword = document.getElementById("confirmPassword");
+
+        username.addEventListener("input", () => {
+            showFeedback(
+                "usernameFeedback",
+                username.value.trim().length >= 3,
+                "✓ Username looks good!",
+                "Username must contain at least 3 characters."
+            );
+        });
+
+        email.addEventListener("input", () => {
+            showFeedback(
+                "emailFeedback",
+                email.validity.valid,
+                "✓ Email looks good!",
+                "Enter a valid email address."
+            );
+        });
+
+        password.addEventListener("input", validatePasswords);
+        confirmPassword.addEventListener("input", validatePasswords);
+
+        function validatePasswords() {
+            showFeedback(
+                "passwordFeedback",
+                password.value.length >= 6,
+                "✓ Password looks good!",
+                "Password must contain at least 6 characters."
+            );
+
+            showFeedback(
+                "confirmFeedback",
+                confirmPassword.value === password.value &&
+                confirmPassword.value.length > 0,
+                "✓ Passwords match!",
+                "Passwords do not match."
+            );
+        }
+
+        function showFeedback(id, valid, success, error) {
+            const feedback = document.getElementById(id);
+            feedback.textContent = valid ? success : error;
+            feedback.className = valid
+                ? "feedback success"
+                : "feedback error";
+        }
+
+        function togglePassword(fieldId, iconId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(iconId);
+
+            field.type = field.type === "password" ? "text" : "password";
+            icon.classList.toggle("bx-hide");
+            icon.classList.toggle("bx-show");
+        }
+
+        document.getElementById("registerForm").addEventListener("submit", function(event) {
+            if (password.value.length < 6 ||
+                password.value !== confirmPassword.value) {
+                event.preventDefault();
+                validatePasswords();
+                return;
+            }
+
+            const button = document.getElementById("registerButton");
+            button.disabled = true;
+            button.querySelector("span").textContent = "Creating account...";
+        });
+    </script>
+</body>
+</html>
+
+
+

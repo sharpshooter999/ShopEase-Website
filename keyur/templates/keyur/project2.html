@@ -1,0 +1,121 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin & User Login</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <!-- <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url("{% static 'images/online-shopping-concept.jpg' %}") no-repeat center center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 20px; /* Adds space between the boxes */
+            width: 70%;
+        }
+
+        .box {
+            width: 45%; /* Adjust the width of each box */
+            background: rgba(255, 255, 255, 0.3); /* Transparent white background */
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0px 4px 10px rgba(251, 249, 249, 0.3);
+            backdrop-filter: blur(1px); /* Blurred background for glass effect */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .box:hover {
+            transform: scale(1.05); /* Slightly larger on hover */
+        }
+
+        .box .icon {
+            font-size: 80px; /* Increased icon size */
+            margin-bottom: 20px;
+            background-color: rgb(248, 245, 245);
+            color: inherit;
+            padding: 15px;
+            border-radius: 50%;
+        }
+
+        .box h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .box button {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            background-color: rgba(250, 246, 246, 0.8); /* Semi-transparent white */
+            color: inherit;
+            cursor: pointer;
+        } -->
+
+     
+    <!-- </style> -->
+    <link rel="stylesheet" href="{% static 'css/new.css' %}">
+</head>
+<body>
+    <header class="welcome">
+        <i class="bx bxs-shield icon-shield"></i>
+        <h1>Welcome Back!</h1>
+        <p>Please choose how you want to continue</p>
+        <span></span>
+    </header>
+
+    <main class="container">
+        <section class="box user" onclick="selectRole('user')">
+            <i class="bx bxs-user-circle role-icon"></i>
+            <h2>User</h2>
+            <p>Access your account and<br>manage your profile</p>
+            <button type="button">
+                <i class="bx bx-chevron-right"></i>
+                Login as User
+            </button>
+        </section>
+
+        <section class="box admin" onclick="selectRole('admin')">
+            <i class="bx bxs-user-pin role-icon"></i>
+            <h2>Admin</h2>
+            <p>Access admin panel and<br>manage the system</p>
+            <button type="button">
+                <i class="bx bx-chevron-right"></i>
+                Login as Admin
+            </button>
+        </section>
+    </main>
+
+    <div id="loading" class="loading">Redirecting...</div>
+
+    <script>
+        function selectRole(role) {
+            document.getElementById("loading").classList.add("show");
+
+            setTimeout(() => {
+                window.location.href = role === "admin"
+                    ? "/admin/"
+                    : "{% url 'login' %}";
+            }, 400);
+        }
+    </script>
+</body>
+</html>

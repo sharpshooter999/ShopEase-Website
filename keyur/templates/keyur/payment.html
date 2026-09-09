@@ -1,0 +1,186 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Method</title>
+  <link rel="stylesheet" href="{% static 'css/frontend.css' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+  <style>
+    body { padding-top: 110px; background: #f8f8f6; }
+    .payment-page { max-width: 980px; margin: 0 auto; }
+  .payment-card { background: #fff; border: 1px solid #e8e8e3; border-radius: 8px; padding: 32px; }
+  .payment-layout { display: grid; grid-template-columns: minmax(210px, .8fr) minmax(0, 1.4fr); gap: 28px; }
+  .method-list { display: grid; gap: 10px; align-content: start; }
+  .method-option { display: flex; align-items: center; gap: 12px; width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 6px; background: #fff; color: #343434; cursor: pointer; text-align: left; }
+  .method-option:hover, .method-option.selected { border-color: coral; background: #fff8f5; }
+  .method-option i { color: coral; font-size: 1.35rem; }
+  .method-option input { accent-color: coral; }
+  .method-panel { display: none; }
+  .method-panel.active { display: block; }
+  .secure-note { color: #6d6d68; font-size: .9rem; }
+  .pay-button { background: coral; border: 0; color: #fff; padding: 11px 24px; border-radius: 5px; }
+  .pay-button:hover { background: #d84d26; }
+  .coupon-box { background: #fff8f5; border: 1px solid #f2d1c5; border-radius: 6px; padding: 16px; }
+  .coupon-message { min-height: 20px; font-size: .9rem; }
+    @media (max-width: 700px) {
+      body { padding-top: 90px; }
+      .payment-card { padding: 20px; }
+      .payment-layout { grid-template-columns: 1fr; gap: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-white py-3 fixed-top">
+    <div class="container-fluid">
+      <span class="brand-mark" aria-label="ShopEase"><img class="brand-logo" src="{% static 'images/logo1.png' %}" alt="ShopEase logo"><span class="brand-title">ShopEase</span></span>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-label="Toggle navigation">
+        <span><i id="bar" class="bx bx-menu"></i></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item"><a class="nav-link" href="{% url 'frontend' %}">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'shop' %}">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'contactus' %}">Contact Us</a></li>
+                    <li class="nav-item"><a href="{% url 'cart' %}" class="nav-link mx-2" style="position: relative;" aria-label="Shopping cart"><i class="bx bxs-shopping-bag"></i><span id="cart-count" class="badge badge-danger" style="position: absolute; top: 5px; right: 5px; display: none;">0</span></a></li>
+          <li class="nav-item"><a href="{% url 'orders' %}" class="nav-link mx-2" aria-label="My orders" title="My orders"><i class="bx bx-receipt"></i></a></li>
+          <li class="nav-item"><a href="{% url 'user' %}" class="nav-link mx-2 profile-link" aria-label="User profile"><i class="bx bxs-user-circle"></i></a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container payment-page my-4">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+    {% if payment_complete %}
+      <section class="payment-card text-center">
+        <i class="bx bx-check-circle text-success" style="font-size: 4rem;"></i>
+        <h1 class="h3 mt-3">Payment successful</h1>
+        <p class="text-muted">Your order has been placed successfully. Expected delivery is within 5 days.</p>
+        {% if discount %}<p class="text-success font-weight-bold">Coupon discount: Rs. {{ discount|floatformat:2 }}</p>{% endif %}
+        {% if total %}<p class="h5">Final total: Rs. {{ total|floatformat:2 }}</p>{% endif %}
+        <a href="{% url 'download_invoice' order_id %}" class="btn pay-button"><i class="bx bx-download"></i> Download bill</a>
+        <a href="{% url 'orders' %}" class="btn btn-outline-secondary ml-2">View my orders</a>
+      </section>
+    {% else %}
+      <section class="payment-card">
+        <h1 class="h3 mb-2">Choose payment method</h1>
+        <p class="text-muted mb-4">Select how you would like to pay for your order.</p>
+        {% if selected_address %}
+          <div class="alert alert-light border mb-4">
+            <strong>Delivering to:</strong> {{ selected_address.full_name }}<br>
+            {{ selected_address.address }}, {{ selected_address.city }}, {{ selected_address.state }} {{ selected_address.zip_code }}, {{ selected_address.country }}<br>
+            {{ selected_address.phone }} · {{ selected_address.email }}
+            <a href="{% url 'address' %}" class="d-block mt-2">Change address</a>
+          </div>
+        {% endif %}
+        <form method="post" id="paymentForm">
+          {% csrf_token %}
+          <input type="hidden" name="cart_items" id="cartItemsInput">
+          <div class="coupon-box mb-4">
+            <label for="couponCode" class="font-weight-bold">Have a coupon?</label>
+            <div class="input-group mt-2">
+              <input type="text" id="couponCode" class="form-control" value="{{ coupon_code|default:'' }}" placeholder="Enter coupon code" maxlength="20">
+              <input type="hidden" name="applied_coupon_code" id="appliedCouponCode" value="">
+              <div class="input-group-append"><button type="button" id="applyCoupon" class="btn btn-outline-danger">Apply coupon</button></div>
+            </div>
+            <div id="couponMessage" class="coupon-message mt-2"></div>
+            <small class="text-muted">Try SHOPEASE10, WELCOME5, or SAVE200.</small>
+          </div>
+          <div class="payment-layout">
+            <div class="method-list" role="radiogroup" aria-label="Payment methods">
+              <label class="method-option selected"><input type="radio" name="payment_method" value="card" checked><i class="bx bx-credit-card"></i><span>Debit or credit card</span></label>
+                            <label class="method-option"><input type="radio" name="payment_method" value="upi"><i class="bx bx-qr-scan"></i><span>UPI</span></label>
+                            <label class="method-option"><input type="radio" name="payment_method" value="net_banking"><i class="bx bx-building-house"></i><span>Net banking</span></label>
+                            <label class="method-option"><input type="radio" name="payment_method" value="cod"><i class="bx bx-package"></i><span>Cash on delivery</span></label>
+            </div>
+            <div>
+              <div class="method-panel active" data-method="card">
+                                <h2 class="h5">Card details</h2>
+                                <div class="form-group"><label for="cardNumber">Card number</label><input class="form-control" id="cardNumber" type="text" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456"></div>
+                                <div class="form-row"><div class="form-group col-sm-6"><label for="expiry">Expiry date</label><input class="form-control" id="expiry" type="text" autocomplete="cc-exp" placeholder="MM / YY"></div><div class="form-group col-sm-6"><label for="cvv">CVV</label><input class="form-control" id="cvv" type="password" inputmode="numeric" autocomplete="cc-csc" placeholder="3 digits"></div></div>
+                <p class="secure-note"><i class="bx bx-lock-alt"></i> Card details are used only for this payment.</p>
+              </div>
+              <div class="method-panel" data-method="upi"><h2 class="h5">UPI details</h2><div class="form-group"><label for="upiId">UPI ID</label><input class="form-control" id="upiId" type="text" placeholder="name@bank"></div><p class="secure-note">You will approve the payment in your UPI app.</p></div>
+                            <div class="method-panel" data-method="net_banking"><h2 class="h5">Net banking</h2><div class="form-group"><label for="bank">Select your bank</label><select class="form-control" id="bank"><option>Choose a bank</option><option>State Bank of India</option><option>HDFC Bank</option><option>ICICI Bank</option><option>Axis Bank</option></select></div><p class="secure-note">You will be redirected to your bank to finish securely.</p></div>
+                            <div class="method-panel" data-method="cod"><h2 class="h5">Cash on delivery</h2><p>Your order will be paid for when it arrives.</p></div>
+                            <button type="submit" class="pay-button">Continue securely</button>
+            </div>
+          </div>
+        </form>
+      </section>
+    {% endif %}
+  </main>
+  <script>
+    const cartStorageKey = "cart_{{ request.session.user_id|default:'guest' }}";
+    const cartItemsInput = document.getElementById('cartItemsInput');
+    const couponCode = document.getElementById('couponCode');
+    const appliedCouponCode = document.getElementById('appliedCouponCode');
+    const applyCoupon = document.getElementById('applyCoupon');
+    const couponMessage = document.getElementById('couponMessage');
+    const couponRates = { SHOPEASE10: { type: 'percent', value: 10 }, WELCOME5: { type: 'percent', value: 5 }, SAVE200: { type: 'flat', value: 200 } };
+    let appliedCoupon = '';
+    function updateCouponPreview() {
+      if (!couponCode) return;
+      const items = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
+      const subtotal = items.reduce((sum, item) => sum + (parseFloat(String(item.price).replace(/[^0-9.-]/g, '')) || 0), 0);
+      const code = appliedCoupon;
+      const coupon = couponRates[code];
+      const discount = coupon ? (coupon.type === 'percent' ? subtotal * coupon.value / 100 : Math.min(subtotal, coupon.value)) : 0;
+      if (coupon) {
+        couponMessage.textContent = `${code} applied successfully. You save Rs. ${discount.toFixed(2)}.`;
+        couponMessage.className = 'coupon-message mt-2 text-success';
+      } else {
+        couponMessage.textContent = '';
+        couponMessage.className = 'coupon-message mt-2 text-danger';
+      }
+    }
+    if (couponCode) couponCode.addEventListener('input', function () {
+      appliedCoupon = '';
+      if (appliedCouponCode) appliedCouponCode.value = '';
+      if (applyCoupon) applyCoupon.textContent = 'Apply coupon';
+      updateCouponPreview();
+    });
+    if (applyCoupon) applyCoupon.addEventListener('click', function () {
+      const code = couponCode.value.trim().toUpperCase();
+      if (!couponRates[code]) {
+        appliedCoupon = '';
+        appliedCouponCode.value = '';
+        updateCouponPreview();
+        couponMessage.textContent = 'Enter a valid coupon code.';
+        couponMessage.className = 'coupon-message mt-2 text-danger';
+      } else {
+        appliedCoupon = code;
+        appliedCouponCode.value = code;
+        applyCoupon.textContent = 'Applied';
+      }
+      updateCouponPreview();
+    });
+    if (cartItemsInput) {
+      cartItemsInput.value = localStorage.getItem(cartStorageKey) || '[]';
+      updateCouponPreview();
+    } else if ({{ payment_complete|yesno:'true,false' }}) {
+      localStorage.removeItem("{{ cart_storage_key }}");
+    }
+    const cartCount = document.getElementById('cart-count');
+    if (cartCount) {
+      const cart = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
+      cartCount.textContent = cart.length;
+      cartCount.style.display = cart.length ? 'block' : 'none';
+    }
+    const options = document.querySelectorAll('.method-option');
+    const panels = document.querySelectorAll('.method-panel');
+    options.forEach((option) => option.addEventListener('click', () => {
+      const method = option.querySelector('input').value;
+      options.forEach((item) => item.classList.toggle('selected', item === option));
+      panels.forEach((panel) => panel.classList.toggle('active', panel.dataset.method === method));
+    }));
+  </script>
+</body>
+</html>

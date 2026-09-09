@@ -1,0 +1,144 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Register</title>
+     <link rel="stylesheet" href="{% static 'css/project.css' %}">
+    <style>
+        body {
+            background: url("{% static 'images/online-shopping-concept.jpg' %}") no-repeat center center/cover;
+        }
+    </style> 
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+    <div class="wrapper">
+        <form id="auth-form">
+            <h1 id="form-title">Login</h1>
+            <div class="input-box">
+                <input type="text" id="username" placeholder="Username" required>
+                <i class='bx bxs-user'></i>
+            </div>
+            <div class="input-box" id="mobile-number-box" style="display: none;">
+                <input type="text" id="mobile-number" placeholder="Mobile Number" pattern="[0-9]{10}" title="Enter a valid 10-digit mobile number"maxlength="10"oninput="validateMobileNumberLength()" required>
+                <i class='bx bxs-phone'></i>
+            </div> 
+            <div class="input-box">
+                <input type="password" id="password" placeholder="Password" required>
+                <i class='bx bxs-show' id="toggle-password" onclick="togglePasswordVisibility('password', this)"></i>
+            </div>
+            <div class="input-box" id="confirm-password-box" style="display: none;">
+                <input type="password" id="confirm-password" placeholder="Confirm Password">
+                <i class='bx bxs-show' id="toggle-confirm-password" onclick="togglePasswordVisibility('confirm-password', this)"></i>
+            </div>
+            
+            <div class="remember-forgot">
+                <label>
+                    <input type="checkbox">Remember Me
+                </label>
+                <a href="forgot.html">Forgot Password</a>
+            </div>
+            <button type="button" class="btn" id="auth-button" onclick="handleAuth()">Login <a href="#"></a></button>
+            <div class="register-link">
+                <p id="toggle-text">Don't have an account? <a href="#" onclick="toggleForm()">Register</a></p>
+            </div>
+            <div id="error-message" style="color: red; text-align: center; margin-top: 10px;"></div>
+            <div id="success-message" style="color: green; text-align: center; margin-top: 10px;"></div>
+        </form>
+    </div>
+
+<script>
+    let isRegistering = false;
+
+    function toggleForm() {
+    isRegistering = !isRegistering;
+
+    const formTitle = document.getElementById('form-title');
+    const confirmPasswordBox = document.getElementById('confirm-password-box');
+    const mobileNumberBox = document.getElementById('mobile-number-box');
+    const toggleText = document.getElementById('toggle-text');
+    const authButton = document.getElementById('auth-button');
+
+    if (isRegistering) {
+        formTitle.innerText = 'Register';
+        confirmPasswordBox.style.display = 'block';
+        mobileNumberBox.style.display = 'block';
+        toggleText.innerHTML = 'Already have an account? <a href="#" onclick="toggleForm()">Login</a>';
+        authButton.innerText = 'Register';
+    } else {
+        formTitle.innerText = 'Login';
+        confirmPasswordBox.style.display = 'none';
+        mobileNumberBox.style.display = 'none';
+        toggleText.innerHTML = 'Don\'t have an account? <a href="#" onclick="toggleForm()">Register</a>';
+        authButton.innerText = 'Login';
+    }
+}
+
+function handleAuth() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const confirmPassword = document.getElementById('confirm-password').value.trim();
+    const mobileNumber = document.getElementById('mobile-number').value.trim();
+    const errorMessage = document.getElementById('error-message');
+    const successMessage = document.getElementById('success-message');
+
+    errorMessage.innerText = '';
+    successMessage.innerText = '';
+
+    if (!username) {
+        errorMessage.innerText = 'Username is required.';
+        return;
+    }
+
+    if (!password) {
+        errorMessage.innerText = 'Password is required.';
+        return;
+    }
+
+    if (isRegistering) {
+        if (!confirmPassword) {
+            errorMessage.innerText = 'Please confirm your password.';
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            errorMessage.innerText = 'Passwords do not match.';
+            return;
+        }
+
+        if (!mobileNumber || !/^\d{10}$/.test(mobileNumber)) {
+            errorMessage.innerText = 'Please enter a valid 10-digit mobile number.';
+            return;
+        }
+
+        successMessage.innerText = 'Registration successful! You can now log in.';
+        document.getElementById('auth-form').reset();
+        toggleForm();
+    } else {
+        successMessage.innerText = 'Login successful!';
+        document.getElementById('auth-form').reset();
+
+        // Redirect to frontend.html
+        setTimeout(() => {
+            window.location.href = "{#";
+        }, 1);
+    }
+}
+function togglePasswordVisibility(inputId, icon) {
+    const inputField = document.getElementById(inputId);
+
+    if (inputField.type === "password") {
+        inputField.type = "text";
+        icon.classList.remove('bxs-hide');
+        icon.classList.add('bxs-show'); // Change icon to show visibility
+    } else {
+        inputField.type = "password";
+        icon.classList.remove('bxs-show');
+        icon.classList.add('bxs-hide'); // Revert icon to hide visibility
+    }
+}
+</script>
+</body>
+</html>

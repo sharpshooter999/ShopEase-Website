@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop</title>
+    <link rel="stylesheet" href="{% static 'css/frontend.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        body { padding-top: 90px; background: #f8f8f6; }
+        .shop-heading { padding: 42px 0 32px; }
+        .product { background: transparent; padding: 0 12px 22px; margin-bottom: 32px; cursor: pointer; transition: transform .3s ease; }
+        .product:hover { transform: translateY(-6px); }
+        .product a { display: block; }
+        .product img { width: 100%; height: 330px; object-fit: cover; object-position: center; transition: opacity .3s ease; }
+        .product:hover img { opacity: .8; }
+        .product .p-name { font-size: 1.1rem; font-weight: 600; margin-top: 18px; }
+        .product .p-description { min-height: 48px; color: #777; font-size: .9rem; margin: 8px 0 10px; line-height: 1.5; }
+        .product .p-price { color: #555; margin-top: 4px; }
+        .buy-btn { background: green; color: white; border: 0; padding: 9px 18px; }
+        .buy-btn:hover { background: #006b00; }
+        .shop-link-active { color: coral !important; }
+        .shop-link-active:hover { color: #d04921 !important; }
+        .recommendations { border-top: 1px solid #e5e5e5; margin-top: 30px; padding: 55px 0 20px; }
+        .recommendation-card { height: 100%; background: #fff; padding: 18px; }
+        .recommendation-card img { width: 100%; height: 240px; object-fit: cover; }
+        .recommendation-card h3 { font-size: 1.15rem; margin: 18px 0 8px; }
+        .recommendation-card p { color: #777; font-size: .92rem; line-height: 1.55; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white py-3 fixed-top">
+        <div class="container-fluid">
+            <span class="brand-mark" aria-label="ShopEase"><img class="brand-logo" src="{% static 'images/logo1.png' %}" alt="ShopEase logo"><span class="brand-title">ShopEase</span></span>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-label="Toggle navigation">
+                <span><i id="bar" class="bx bx-menu"></i></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'frontend' %}">Home</a></li>
+                    <li class="nav-item active"><a class="nav-link shop-link-active" href="{% url 'shop' %}">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'contactus' %}">Contact Us</a></li>
+                    <li class="nav-item">
+                        <a href="{% url 'cart' %}" class="nav-link mx-2" style="position: relative;" aria-label="Shopping cart">
+                            <i id="cart-icon" class="bx bxs-shopping-bag"></i>
+                            <span id="cart-count" class="badge badge-danger" style="position: absolute; top: 5px; right: 5px; display: none;">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item"><a href="{% url 'orders' %}" class="nav-link mx-2" aria-label="My orders" title="My orders"><i class="bx bx-receipt"></i></a></li>
+                    <li class="nav-item">
+                        <a href="{% url 'user' %}" class="nav-link mx-2 profile-link" aria-label="User profile" title="User profile">
+                            <i class="bx bxs-user-circle"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="shop-heading text-center">
+            <h1 class="font-weight-bold">Our Shop</h1>
+            <p>Explore our latest products.</p>
+        </div>
+        <div class="row">
+            {% for product in products %}
+                <div class="product text-center col-lg-3 col-md-4 col-12">
+                    <a href="{% url 'product_detail' product.id %}">
+                        {% with product_type=product.category|default:product.name|lower %}
+                            {% if "t-shirt" in product_type or "tshirt" in product_type %}
+                                <img class="img-fluid" src="{{ product.image.url }}" alt="T-shirt product image">
+                            {% elif "shirt" in product_type %}
+                                <img class="img-fluid" src="{{ product.image.url }}" alt="Shirt product image">
+                            {% elif "combo" in product_type or "cloth" in product_type or "fashion" in product_type %}
+                                <img class="img-fluid" src="{{ product.image.url }}" alt="Clothing combo product image">
+                            {% elif "dress" in product_type or "women" in product_type %}
+                                <img class="img-fluid" src="{{ product.image.url }}" alt="Women's clothing product image">
+                            {% elif "shoe" in product_type or "sneaker" in product_type %}
+                                <img class="img-fluid" src="{{ product.image.url }}" alt="Shoes product image">
+                            {% elif "watch" in product_type %}
+                                <img class="img-fluid" src="{{ product.image.url }}" alt="Watch product image">
+                            {% else %}
+                                <img class="img-fluid" src="{{ product.image.url }}" alt="{{ product.name|default:'Clothing' }} product image">
+                            {% endif %}
+                        {% endwith %}
+                    </a>
+                    <div class="p-name">{{ product.name }}</div>
+                    <div class="p-description">{{ product.description|default:"No description available." }}</div>
+                    <div class="p-price">₹{{ product.price }}</div>
+                    {% if product.stock %}
+                        <small class="text-muted d-block mb-2">{{ product.stock }} available</small>
+                        <div class="d-flex justify-content-center align-items-center mb-2">
+                            <select class="form-control form-control-sm mr-2 product-size" style="max-width: 90px;" aria-label="Size for {{ product.name }}">
+                                <option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option>
+                            </select>
+                            <input class="form-control form-control-sm product-quantity" style="max-width: 70px;" type="number" value="1" min="1" max="{{ product.stock }}" aria-label="Quantity for {{ product.name }}">
+                        </div>
+                        <button type="button" class="buy-btn" data-id="{{ product.id }}" data-name="{{ product.name }}" data-price="{{ product.price }}">Add To Cart</button>
+                    {% else %}
+                        <small class="text-danger d-block mb-2">Out of stock</small>
+                        <button type="button" class="buy-btn" disabled>Out of Stock</button>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p class="col-12 text-center text-muted">No products are available right now.</p>
+            {% endfor %}
+        </div>
+
+    </main>
+
+    <script>
+        function getCart() {
+            return JSON.parse(localStorage.getItem("cart_{{ request.session.user_id|default:'guest' }}")) || [];
+        }
+
+        function updateCartCount() {
+            const cart = getCart();
+            const totalQuantity = cart.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+            const cartCount = document.getElementById('cart-count');
+            if (cartCount) {
+                cartCount.textContent = totalQuantity;
+                cartCount.style.display = totalQuantity ? 'block' : 'none';
+            }
+        }
+
+        document.querySelectorAll('.buy-btn').forEach((button) => {
+            button.addEventListener('click', () => {
+                const cart = getCart();
+                const product = button.closest('.product');
+                const quantityInput = product.querySelector('.product-quantity');
+                const size = product.querySelector('.product-size').value;
+                const maxStock = Number(quantityInput.max) || 5;
+                const requestedQty = Math.max(1, Math.min(Number(quantityInput.value) || 1, maxStock));
+                const productKey = `${Number(button.dataset.id)}|${size}`;
+                const existing = cart.find((item) => `${Number(item.product_id)}|${item.size || 'One Size'}` === productKey);
+                const currentQty = existing ? Number(existing.quantity) || 0 : 0;
+                const newQty = Math.min(currentQty + requestedQty, maxStock);
+
+                if (existing) {
+                    existing.quantity = newQty;
+                    existing.stock = maxStock;
+                } else {
+                    cart.push({
+                        product_id: Number(button.dataset.id),
+                        name: button.dataset.name,
+                        price: button.dataset.price,
+                        image: product.querySelector('img').src,
+                        size,
+                        quantity: newQty,
+                        stock: maxStock,
+                    });
+                }
+
+                localStorage.setItem("cart_{{ request.session.user_id|default:'guest' }}", JSON.stringify(cart));
+                updateCartCount();
+                alert(`${button.dataset.name} added to cart!`);
+            });
+        });
+
+        updateCartCount();
+    </script>
+</body>
+</html>

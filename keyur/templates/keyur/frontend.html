@@ -1,0 +1,893 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend</title>
+    <link rel="stylesheet" href="{% static 'css/frontend.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+#navbarSupportedContent > ul > li:nth-child(1) > a{
+  color:coral;
+}
+
+body {
+  padding-top: 0;
+  }
+
+.home-hero .carousel-image-wrapper {
+  filter: saturate(.9);
+  transition: transform .8s ease, filter .8s ease;
+}
+.home-hero .carousel-item.active .carousel-image-wrapper {
+  transform: scale(1.03);
+  filter: saturate(1.15);
+}
+.collection-tile {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  color: white;
+  text-decoration: none !important;
+}
+.collection-tile img { transition: transform .5s ease, filter .5s ease; }
+.collection-tile::after {
+  content: 'Explore collection';
+  position: absolute;
+  left: 24px;
+  bottom: 20px;
+  padding: 8px 12px;
+  color: white;
+  background: rgba(0, 0, 0, .6);
+  font-size: .85rem;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .3s ease, transform .3s ease;
+}
+.collection-tile:hover img, .collection-tile:focus img { transform: scale(1.08); filter: brightness(.75); }
+.collection-tile:hover::after, .collection-tile:focus::after { opacity: 1; transform: translateY(0); }
+.collection-tile .details { pointer-events: none; }
+
+#carouselExample {
+  position: relative;
+  z-index: 1;
+  }
+
+.carousel-image-wrapper {
+  background-size: cover;
+  background-position: center;
+  height: 600px; /* Set an appropriate height */
+}
+
+/* Specific Images */
+.image-back {
+    background-image: url("{% static 'images/back.jpg' %}");
+}
+
+.image-parallax {
+    background-image: url("{% static 'images/parallax.jpg' %}");
+}
+
+.image-video {
+    background-image: url("{% static 'images/video-image2.jpg' %}");
+}
+
+/* Caption Styles */
+.caption-style {
+    left: 10px;
+    bottom: 10px;
+}
+
+#mens-section .product,
+#womens-section .product,
+#shirts-section .product,
+#tshirts-section .product,
+#watches-section .product,
+#shoes-section .product {
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  padding: 14px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#mens-section .product:hover,
+#womens-section .product:hover,
+#shirts-section .product:hover,
+#tshirts-section .product:hover,
+#watches-section .product:hover,
+#shoes-section .product:hover {
+  border-color: coral;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.banner{
+  background-image: url("{% static 'images/2.jpg' %}");
+  width: 100%;
+  height:60vh;
+  background-size: cover;
+  background-position: top 70px center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.product-section {
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+  padding-bottom: 0 !important;
+    opacity: 0;
+    transform: translateY(200px);
+    transition: all 0.9s ease-out;
+    visibility: hidden;
+}
+
+.product-section > .container.text-center {
+  margin-top: 0 !important;
+  padding-top: 1.5rem !important;
+  padding-bottom: 1rem !important;
+}
+
+#shoes-section {
+  margin-bottom: 0 !important;
+}
+
+#shoes-section > .container.text-center {
+  padding-bottom: 0 !important;
+}
+
+.product-section.show {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+}
+
+/* Optional animation for individual products */
+.product {
+    opacity: 0;
+    transform: translateY(200px);
+    transition: all 0.9s ease-out;
+    transition-delay: calc(0.2s * var(--product-index, 0));
+}
+
+.product.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.product-section .product {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.product-section .product:hover,
+.product-section .product:focus-within {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+#cart-popup {
+    position: absolute;
+    background: green;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    z-index: 1000;
+    display: none; /* Initially hidden */
+}
+
+</style>
+</head>
+<body>
+                   {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-white py-3 fixed-top">
+    <div class="container-fluid">
+      <span class="brand-mark" aria-label="ShopEase"><img class="brand-logo" src="{% static 'images/logo1.png' %}" alt="ShopEase logo"><span class="brand-title">ShopEase</span></span>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i id="bar" class='bx bx-menu'></i></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'frontend' %}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'shop' %}">Shop</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'contactus' %}">Contact Us</a>
+          </li>
+          <!-- <li class="nav-item">
+            <div class="container my-4">
+              <div class="input-group" style="max-width: 500px; margin: auto; position: relative;">
+                <input 
+                  id="product-search" 
+                  class="form-control" 
+                  type="text" 
+                  placeholder="Search" 
+                  style="border-radius: 20px; padding-right: 40px;">
+                <i 
+                  class="bx bx-search" 
+                  style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); font-size: 18px; color: #aaa; cursor: pointer;">
+                </i>
+              </div>
+            </div>            
+          </li> -->
+          <li class="nav-item">
+            <a href="{% url 'cart' %}" class="nav-link mx-2" style="position: relative;">
+              <i id="cart-icon" class='bx bxs-shopping-bag'></i>
+              <span id="cart-count" class="badge badge-danger" style="position: absolute; top: 5px; right: 5px; display: none;">0</span>
+              <div id="cart-popup" class="alert alert-success">Product added to cart!</div>
+            </a>                    
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'orders' %}" class="nav-link mx-2" aria-label="My orders" title="My orders"><i class="bx bx-receipt"></i></a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'user' %}" class="nav-link mx-2 profile-link" aria-label="User profile" title="User profile">
+              <i class="bx bxs-user-circle"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+<div id="carouselExample" class="carousel slide home-hero" data-bs-ride="carousel" data-bs-interval="4500">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <div class="carousel-image-wrapper image-back"></div>
+            <div class="carousel-caption text-left d-flex flex-column align-items-start justify-content-start caption-style">
+                <h2 class="banner-title">Exclusive Collection</h2>
+                <p>Exclusive collection get 20% off</p>
+                <div class="btn-wrap">
+                    <a href="{% url 'shop' %}" class="btn btn-light btn-medium d-flex align-items-center" tabindex="0">Shop it now <i class="icon icon-arrow-io"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="carousel-image-wrapper image-parallax"></div>
+            <div class="carousel-caption text-left d-flex flex-column align-items-start justify-content-start caption-style">
+                <h2 class="banner-title">Main Banner</h2>
+                <p>Exclusive Collection get 30% off</p>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="carousel-image-wrapper image-video"></div>
+            <div class="carousel-caption text-left d-flex flex-column align-items-start justify-content-start caption-style">
+                <h2 class="banner-title">Casual Collection</h2>
+                <p>Exclusive Collection get 10% off</p>
+                <div class="btn-wrap">
+                    <a href="{% url 'shop' %}" class="btn btn-light btn-medium d-flex align-items-center" tabindex="0">Shop it now <i class="icon icon-arrow-io"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <section id="brand" class="container">
+      <div class="row m-0 py-5">
+      <img class="img-fluid col-lg-2 col-md-4 col-6 "src="{% static 'images/1.png' %}" alt="Brand logo">
+      <img class="img-fluid col-lg-2 col-md-4 col-6 "src="{% static 'images/2.png' %}" alt="Brand logo">
+      <img class="img-fluid col-lg-2 col-md-4 col-6 "src="{% static 'images/3.png' %}" alt="Brand logo">
+      <img class="img-fluid col-lg-2 col-md-4 col-6 "src="{% static 'images/4.png' %}" alt="Brand logo">
+      <img class="img-fluid col-lg-2 col-md-4 col-6 "src="{% static 'images/5.png' %}" alt="Brand logo">
+      <img class="img-fluid col-lg-2 col-md-4 col-6 "src="{% static 'images/6.png' %}" alt="Brand logo">
+      </div>
+    </section>
+
+    <section id="new" class="w-100">
+      <div class="row p-0 m-0">
+        <a href="#shoes-section" class="one collection-tile col-lg-4 col-md-12 col-12 p-0">
+          <img class="img-fluid" src="{% static 'images/shoes-blog-1.png' %}" alt="Sneaker collection image">
+
+          <div class="details">
+            <h2>Extreme Rare Sneakers</h2>
+            <!-- <button class="text-uppercase">Shop now</button> -->
+          </div>
+        </a>
+
+        <a href="#womens-section" class="one collection-tile col-lg-4 col-md-12 col-12 p-0">
+          <img class="img-fluid" src="{% static 'images/product-large-2.jpg' %}" alt="Women's clothing collection image">
+          <div class="details">
+            <h2>Awesome Outfit</h2>
+            <!-- <button class="text-uppercase">Shop now</button> -->
+          </div>
+        </a>
+              
+        <a href="#mens-section" class="one collection-tile col-lg-4 col-md-12 col-12 p-0">
+          <img class="img-fluid" src="{% static 'images/selling-products17.jpg' %}" alt="Men's clothing collection image">
+          <div class="details">
+            <h2>Men's Fashion</h2>
+            <!-- <button class="text-uppercase">Shop now</button> -->
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section id="mens-section" class="my-5 pb-5">
+      <div class="container text-center mt-5 py-5">
+        <h3>Men's Fashion</h3>
+        <hr class="mx-auto">
+        <p>Here you can check out our new product with their fair price on rymo.</p>
+      </div>
+      <div class="row mx-auto container-fluid">
+        <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product1/';">
+          <img class="img-fluid mb-3" src="{% static 'images/men-01.jpg' %}" alt="Men's casual clothing combo">
+          <h5 class="p-name">Casual Combo</h5>
+          <h4 class="p-price">₹900.00</h4>
+        </div>
+
+        <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product2/';">
+          <img class="img-fluid mb-3" src="{% static 'images/men-02.jpg' %}" alt="Men's smart clothing combo">
+          <h5 class="p-name">Smart Combo</h5>
+          <h4 class="p-price">₹850.00</h4>
+        </div>
+
+        <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product3/';">
+          <img class="img-fluid mb-3" src="{% static 'images/men-03.jpg' %}" alt="Men's everyday clothing combo">
+          <h5 class="p-name">Everyday Combo</h5>
+          <h4 class="p-price">₹750.00</h4>
+        </div>
+
+        <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product4/';">
+          <img class="img-fluid mb-3" src="{% static 'images/selling-products4.jpg' %}" alt="Men's premium clothing combo">
+          <h5 class="p-name">Premium Combo</h5>
+          <h4 class="p-price">₹899.00</h4>
+        </div>
+      </div>
+    </section>
+
+    <section class="banner my-5 pb-5">
+      <div class="container">
+        <h4>MID SEASON'S SALE</h4>
+        <h1>Exclusive Collection<br>UP TO 20% OFF</h1>
+        <button class="text-uppercase"onclick="location.href='/shop'">Shop Now</button>
+      </div>
+    </section>
+
+    <section id="womens-section" class="my-5 pb-5">
+      <div class="container text-center mt-5 py-5">
+        <h3>Women's Fashion</h3>
+        <hr class="mx-auto">
+        <p>Here you can check out our new product with their fair price on rymo.</p>
+      </div>
+      <div class="row mx-auto container-fluid">
+        <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product5/';">
+          <img class="img-fluid mb-3" src="{% static 'images/women-01.jpg' %}" alt="Women's floral dress">
+          <h5 class="p-name">Floral Dress</h5>
+          <h4 class="p-price">₹999.00</h4>
+        </div>
+
+        <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product6/';">
+          <img class="img-fluid mb-3" src="{% static 'images/women-02.jpg' %}" alt="Women's casual dress">
+          <h5 class="p-name">Casual Dress</h5>
+          <h4 class="p-price">₹1499.00</h4>
+        </div>
+
+        <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product7/';">
+          <img class="img-fluid mb-3" src="{% static 'images/women-03.jpg' %}" alt="Women's printed dress">
+          <h5 class="p-name">Printed Dress</h5>
+          <h4 class="p-price">₹1099.00</h4>
+        </div> 
+
+        <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product8/';">
+          <img class="img-fluid mb-3" src="{% static 'images/category_11.png' %}" alt="Women's statement dress">
+          <h5 class="p-name">Statement Dress</h5>
+          <h4 class="p-price">₹1299.00</h4>
+        </div>
+      </div>
+    </section> 
+
+        <section id="shirts-section" class="my-5">
+          <div class="container text-center mt-5 py-5">
+            <h3>Shirts</h3>
+            <hr class="mx-auto">
+            <p>Here you can check out our new product with their fair price on rymo.</p>
+          </div>
+          <div class="row mx-auto container-fluid">
+            <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product9/';">
+              <img class="img-fluid mb-3" src="{% static 'images/shirt-4.png' %}" alt="Blue casual shirt">
+              <h5 class="p-name">Blue Casual Shirt</h5>
+              <h4 class="p-price">₹499.00</h4>
+            </div>
+    
+            <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product10/';">
+              <img class="img-fluid mb-3" src="{% static 'images/shirt-6.png' %}" alt="Patterned casual shirt">
+              <h5 class="p-name">Patterned Shirt</h5>
+              <h4 class="p-price">₹499.00</h4>
+            </div>
+    
+            <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product11/';">
+              <img class="img-fluid mb-3" src="{% static 'images/shirt-1.png' %}" alt="Classic button-down shirt">
+              <h5 class="p-name">Classic Shirt</h5>
+              <h4 class="p-price">₹499.00</h4>
+            </div>
+    
+            <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product12/';">
+              <img class="img-fluid mb-3" src="{% static 'images/shirt-8.png' %}" alt="Modern casual shirt">
+              <h5 class="p-name">Modern Shirt</h5>
+              <h4 class="p-price">₹499.00</h4>
+            </div>
+    
+          </div>
+        </section>
+
+    <section id="tshirts-section" class="my-5">
+      <div class="container text-center mt-5 py-5">
+        <h3>Tshirts</h3>
+        <hr class="mx-auto">
+        <p>Here you can check out our new product with their fair price on rymo.</p>
+      </div>
+      <div class="row mx-auto container-fluid">
+        <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product13/';">
+          <img class="img-fluid mb-3" src="{% static 'images/123.jpg' %}" alt="Classic cotton T-shirt">
+          <h5 class="p-name">Classic T-shirt</h5>
+          <h4 class="p-price">₹299.00</h4>
+        </div>
+
+        <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product14/';">
+          <img class="img-fluid mb-3" src="{% static 'images/red-tshirt.png' %}" alt="Red casual T-shirt">
+          <h5 class="p-name">Red T-shirt</h5>
+          <h4 class="p-price">₹299.00</h4>
+        </div>
+
+        <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product15/';">
+          <img class="img-fluid mb-3" src="{% static 'images/purple-tshirt.png' %}" alt="Purple casual T-shirt">
+          <h5 class="p-name">Purple T-shirt</h5>
+          <h4 class="p-price">₹299.00</h4>
+        </div>
+
+        <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product16/';">
+          <img class="img-fluid mb-3" src="{% static 'images/white-tshirt.png' %}" alt="White casual T-shirt">
+          <h5 class="p-name">White T-shirt</h5>
+          <h4 class="p-price">₹299.00</h4>
+        </div>
+      </div>
+    </section>  
+
+        <section id="watches-section" class="my-5">
+          <div class="container text-center mt-5 py-5">
+            <h3>Best Watches</h3>
+            <hr class="mx-auto">
+            <p>Here you can check out our new product with their fair price on rymo.</p>
+          </div>
+          <div class="row mx-auto container-fluid">
+            <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product17/';">
+              <img class="img-fluid mb-3" src="{% static 'images/watch1.jpg'%}" alt="Classic wrist watch">
+              <h5 class="p-name">Classic Watch</h5>
+              <h4 class="p-price">₹150.00</h4>
+            </div>
+    
+            <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product18/';">
+              <img class="img-fluid mb-3" src="{% static 'images/watch2.jpg'%}" alt="Silver wrist watch">
+              <h5 class="p-name">Silver Watch</h5>
+              <h4 class="p-price">₹250.00</h4>
+            </div>
+    
+            <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product19/';">
+              <img class="img-fluid mb-3" src="{% static 'images/watch3.jpg'%}" alt="Premium wrist watch">
+              <h5 class="p-name">Premium Watch</h5>
+              <h4 class="p-price">₹299.00</h4>
+            </div>
+    
+            <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product20/';">
+              <img class="img-fluid mb-3" src="{% static 'images/watch4.jpg' %}" alt="Designer wrist watch">
+              <h5 class="p-name">Designer Watch</h5>
+              <h4 class="p-price">₹199.00</h4>
+            </div>
+    
+          </div>
+        </section>
+
+        <section id="shoes-section" class="mt-5 mb-0">
+          <div class="container text-center mt-5 py-5">
+            <h3>Best Shoes</h3>
+            <hr class="mx-auto">
+            <p>Here you can check out our new product with their fair price on rymo.</p>
+          </div>
+          <div class="row mx-auto container-fluid">
+            <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product21/';">
+              <img class="img-fluid mb-3" src="{% static 'images/shoe-1.png' %}" alt="Classic casual shoes">
+              <h5 class="p-name">Classic Shoes</h5>
+              <h4 class="p-price">₹899.00</h4>
+            </div>
+    
+            <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product22/';">
+              <img class="img-fluid mb-3"src="{% static 'images/shoe-2.png' %}" alt="White sneakers">
+              <h5 class="p-name">White Sneakers</h5>
+              <h4 class="p-price">₹999.00</h4>
+            </div>
+    
+            <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product23/';">
+              <img class="img-fluid mb-3" src="{% static 'images/shoe-5.png' %}" alt="Sport running shoes">
+              <h5 class="p-name">Running Shoes</h5>
+              <h4 class="p-price">₹1099.00</h4>
+            </div>
+    
+            <div class="product text-center col-lg-3 col-md-4 col-12" onclick="window.location.href='/product24/';">
+              <img class="img-fluid mb-3" src="{% static 'images/shoe-8.png' %}" alt="Modern athletic shoes">
+              <h5 class="p-name">Athletic Shoes</h5>
+              <h4 class="p-price">₹1099.00</h4>
+            </div>
+    
+          </div>
+        </section>
+
+
+    <footer class="mt-0 py-5">
+      <div class="row container mx-auto pt-5">
+        <div class="footer-one col-lg-3 col-md-6 col-12">
+          <h5 class="pb-2">ShopEase</h5>
+          <p class="pt-3">ShopEase brings quality products at fair prices.</p>
+        </div>
+        <div class="footer-one col-lg-3 col-md-6 col-12 mb-3">
+          <h5 class="pb-2">Featured</h5>
+          <ul class="text-uppercase list-unstyled">
+              <li><a href="#mens-section">Men</a></li>
+              <li><a href="#womens-section">Women</a></li>
+              <li><a href="#shirts-section">Shirts</a></li>
+              <li><a href="#tshirts-section">T'Shirts</a></li>
+              <li><a href="#shoes-section">Shoes</a></li>
+              <li><a href="#watches-section">Watches</a></li>
+          </ul>
+      </div>      
+
+        <div class="footer-one col-lg-3 col-md-6 col-12 mb-3">
+          <h5 class="pb-2">Contact Us</h5>
+          <div>
+            <h6 class="text-uppercase">Address</h6>
+            <p>208 Nivas,tanksad,Guwahati </p>
+          </div>
+
+          <div>
+            <h6 class="text-uppercase">Phone</h6>
+            <p>(+91) 7778889990</p>
+          </div>
+        
+          <div>
+            <h6 class="text-uppercase">Email</h6>
+            <p>support@shopease.com</p>
+          </div>
+        </div>
+
+        <div class="footer-one col-lg-3 col-md-6 col-12">
+          <h5 class="pb-2">Location</h5>
+        <div class="contact map">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7343.856069792893!2d72.5866141418693!3d23.026414416684123!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e84491b99bdc9%3A0x5cd2790ff39d33f5!2sOld%20City%2C%20Tankshal%2C%20Khadia%2C%20Ahmedabad%2C%20Gujarat%20380001!5e0!3m2!1sen!2sin!4v1737280387124!5m2!1sen!2sin" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+        </div>
+      </div>
+      <div class="copyright mt-5">
+        <div class="xyz">
+        <div class="row container mx-autp">
+
+          <div class="col-lg-3 col-md-6 col-12 mb-4 ">
+            <img src="{% static 'images/payment.png' %}" alt="Payment methods">
+          </div>
+          
+          <div class="col-lg-4 col-md-6 col-12 mb-2 ">
+            <p>ShopEase Ecommerce @ 2025. All Rights Reserved</p>
+          </div>
+          <div class="col-lg-3 col-md-6 col-12">
+            <a href="https://www.facebook.com/"><i class='bx bxl-facebook-circle'></i></a>
+            <a href="https://in.linkedin.com/"><i class='bx bxl-linkedin-square' ></i></a>
+            <a href="https://www.instagram.com/"><i class='bx bxl-instagram' ></i></a>
+          </div>
+
+        </div>
+        </div>
+
+      </div>
+
+    </footer>
+    
+<script>
+    // Define global variables
+const cartStorageKey = "cart_{{ request.session.user_id|default:'guest' }}";
+const cartContainer = document.querySelector("#cart-items"); // Ensure the container exists
+const searchInput = document.getElementById("product-search");
+let cartCount = 0;
+
+// Handle product search
+if (searchInput) {
+  searchInput.addEventListener("input", function () {
+    const query = searchInput.value.toLowerCase().trim();
+    const products = document.querySelectorAll(".product, .one, .img-fluid");
+
+    const pageRedirects = {
+      home: "frontend.html",
+      shop: "shop.html",
+      contactus: "contactus.html",
+    };
+
+    // Check for direct page redirection
+    if (query in pageRedirects) {
+      window.location.href = pageRedirects[query];
+      return;
+    }
+
+    // Filter products based on search query
+    products.forEach((product) => {
+      const productText = product.innerText.toLowerCase();
+      const productAlt = product.alt ? product.alt.toLowerCase() : "";
+      if (productText.includes(query) || productAlt.includes(query)) {
+        product.style.display = "block";
+      } else {
+        product.style.display = "none";
+      }
+    });
+  });
+}
+
+// Handle Add to Cart
+const addToCartButtons = document.querySelectorAll(".buy-btn");
+const shoppingBagIcon = document.querySelector(".bxs-shopping-bag");
+
+// Create a cart count element
+if (shoppingBagIcon) {
+  const cartCountElement = document.createElement("span");
+  cartCountElement.style.position = "absolute";
+  cartCountElement.style.top = "-10px";
+  cartCountElement.style.right = "-10px";
+  cartCountElement.style.backgroundColor = "red";
+  cartCountElement.style.color = "white";
+  cartCountElement.style.borderRadius = "50%";
+  cartCountElement.style.padding = "5px 10px";
+  cartCountElement.style.fontSize = "12px";
+  cartCountElement.style.fontWeight = "bold";
+  cartCountElement.style.display = "none"; // Initially hidden
+  shoppingBagIcon.parentElement.style.position = "relative";
+  shoppingBagIcon.parentElement.appendChild(cartCountElement);
+
+  addToCartButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const product = this.closest(".product");
+      const productName = product.querySelector(".p-name").textContent;
+      const productPrice = product.querySelector(".p-price").textContent;
+      const productImage = product.querySelector("img").src;
+
+      const cartItem = {
+        name: productName,
+        price: productPrice,
+        image: productImage,
+      };
+
+      let cart = JSON.parse(localStorage.getItem(cartStorageKey)) || [];
+      cart.push(cartItem);
+      localStorage.setItem(cartStorageKey, JSON.stringify(cart));
+
+      cartCount++;
+      cartCountElement.textContent = cartCount;
+      cartCountElement.style.display = "inline";
+
+      alert(`${productName} added to cart!`);
+    });
+  });
+}
+
+// Function to render the cart
+function renderCart() {
+  const cart = JSON.parse(localStorage.getItem(cartStorageKey)) || [];
+  cartContainer.innerHTML = ""; // Clear container
+
+  if (cart.length === 0) {
+    cartContainer.innerHTML = "<p class='cart-empty'>Your cart is empty.</p>";
+  } else {
+    cart.forEach((item, index) => {
+      const cartItemHTML = `
+        <div class="cart-item">
+          <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+          <div class="cart-item-details">
+            <h5 class="cart-item-name">${item.name}</h5>
+            <p class="cart-item-price">₹${item.price}</p>
+          </div>
+          <button class="buy-btn" onclick="window.location.href='address.html'">Buy Now</button>
+          <button class="remove-btn" data-index="${index}">Remove</button>
+        </div>
+        <hr>
+      `;
+      cartContainer.innerHTML += cartItemHTML;
+    });
+
+    // Add event listeners to remove buttons
+    document.querySelectorAll(".remove-btn").forEach((button) => {
+      button.addEventListener("click", function () {
+        const index = parseInt(button.getAttribute("data-index"));
+        cart.splice(index, 1);
+        localStorage.setItem(cartStorageKey, JSON.stringify(cart));
+        renderCart(); // Re-render the cart
+      });
+    });
+  }
+}
+
+// Render the cart on page load
+if (cartContainer) {
+  renderCart();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Get all product sections
+    const productSections = [
+        'mens-section',
+        'womens-section',
+        'shirts-section',
+        'tshirts-section',
+        'watches-section',
+        'shoes-section'
+    ];
+    
+    // Add the product-section class to all sections
+    productSections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.classList.add('product-section');
+        }
+    });
+
+    // Set up the Intersection Observer
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Show the section
+                entry.target.classList.add('show');
+                
+                // Show individual products with stagger effect
+                const products = entry.target.querySelectorAll('.product');
+                products.forEach((product, index) => {
+                    product.style.setProperty('--product-index', index);
+                    product.classList.add('show');
+                });
+
+                // Optional: unobserve after animation
+                // observer.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.1,  // 10% of the section needs to be visible
+        rootMargin: '50px'  // Start animation slightly before section comes into view
+    });
+
+    // Observe all product sections
+    document.querySelectorAll('.product-section').forEach(section => {
+        observer.observe(section);
+    });
+});
+
+function showCartPopup() {
+    const cartIcon = document.getElementById('cart-icon');
+    const cartPopup = document.getElementById('cart-popup');
+
+    if (cartIcon && cartPopup) {
+        const rect = cartIcon.getBoundingClientRect();
+        cartPopup.style.top = `${rect.top + window.scrollY - 30}px`;  // Adjust above the cart icon
+        cartPopup.style.left = `${rect.left + window.scrollX}px`;
+        cartPopup.style.display = 'block';  // Always visible
+    }
+}
+
+// Call function on page load
+window.onload = function () {
+    showCartPopup();
+};
+
+// Ensure popup updates position on window resize
+window.addEventListener('resize', showCartPopup);
+
+
+
+function updateMainImg(img) {
+        document.getElementById('MainImg').src = img.src;
+    }
+    function addToCart(productName, productPrice) {
+    const productImage = document.getElementById('MainImg').src; 
+    let cart = JSON.parse(localStorage.getItem(cartStorageKey)) || [];
+    cart.push({ name: productName, price: productPrice, image: productImage }); 
+    localStorage.setItem(cartStorageKey, JSON.stringify(cart));
+    alert(`${productName} added to cart!`);
+    updateCartCount();
+}
+
+
+
+    function buyNow(productName, productPrice) {
+        window.location.href = `{% url 'address' %}?product=${encodeURIComponent(productName)}&price=${encodeURIComponent(productPrice)}`;
+    }
+
+    function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem(cartStorageKey)) || [];
+        const cartCount = document.getElementById('cart-count');
+        cartCount.textContent = cart.length;
+        cartCount.style.display = cart.length ? 'block' : 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', updateCartCount);
+
+    document.addEventListener('DOMContentLoaded', () => {
+    fetch('products.json')
+        .then(response => response.json())
+        .then(data => {
+            renderProduct(data[0]); // Render the first product by default
+            renderRelatedProducts(data);
+        })
+        .catch(error => console.error('Error fetching product data:', error));
+});
+
+function renderProduct(product) {
+    document.querySelector('.sproduct h3').textContent = product.name;
+    document.querySelector('.sproduct h2').textContent = `₹${product.price}`;
+    document.querySelector('#MainImg').src = product.image;
+    document.querySelector('.sproduct p').textContent = product.details;
+
+    const sizeSelect = document.querySelector('.sproduct select');
+    sizeSelect.innerHTML = '<option value="">Select Size</option>';
+    product.sizeOptions.forEach(size => {
+        const option = document.createElement('option');
+        option.value = size;
+        option.textContent = size;
+        sizeSelect.appendChild(option);
+    });
+
+    // Update Add to Cart and Buy Now buttons
+    const addToCartButton = document.querySelector('.sproduct .btn-danger');
+    const buyNowButton = document.querySelector('.sproduct .btn-success');
+
+    addToCartButton.onclick = () => addToCart(product.name, product.price);
+    buyNowButton.onclick = () => buyNow(product.name, product.price);
+}
+
+function renderRelatedProducts(products) {
+    const relatedContainer = document.querySelector('#featured .row');
+    relatedContainer.innerHTML = ''; // Clear existing related products
+
+    products.forEach(product => {
+        const productDiv = document.createElement('div');
+        productDiv.className = 'col-lg-3 col-md-4 col-12 text-center';
+
+        productDiv.innerHTML = `
+            <img src="${product.image}" class="img-fluid mb-3" alt="${product.name}">
+            <h5>${product.name}</h5>
+            <h4>₹${product.price}</h4>
+            <button class="btn btn-primary" onclick="buyNow('${product.name}', ${product.price})">Buy Now</button>
+        `;
+
+        relatedContainer.appendChild(productDiv);
+    });
+}
+
+window.onload = function () {
+    const cartIcon = document.getElementById('cart-icon');
+    const cartPopup = document.getElementById('cart-popup');
+
+    if (cartIcon) {
+        const rect = cartIcon.getBoundingClientRect();
+        cartPopup.style.position = 'absolute';
+        cartPopup.style.top = rect.top + window.scrollY + 'px';
+        cartPopup.style.left = rect.left + window.scrollX + 'px';
+    }
+};
+
+
+
+</script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <main class="login-wrapper">
+        <section class="login-card">
+            <h1>Login</h1>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST" id="loginForm">
+                {% csrf_token %}
+
+                <div class="input-box">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email"
+                           placeholder="Enter your email" required>
+                    <i class="bx bx-envelope"></i>
+                </div>
+                <p class="feedback" id="emailFeedback"></p>
+
+                <div class="input-box">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password"
+                           placeholder="Enter your password" required>
+                    <button type="button" class="toggle-password"
+                            onclick="togglePassword()">
+                        <i class="bx bx-hide" id="passwordIcon"></i>
+                    </button>
+                </div>
+                <p class="feedback" id="passwordFeedback"></p>
+
+                <button class="login-button" type="submit" id="loginButton">
+                    <span>Login</span>
+                    <i class="bx bx-right-arrow-alt"></i>
+                </button>
+            </form>
+
+            <a class="forgot-link" href="{% url 'update_password' %}">
+                Forgot Password?
+            </a>
+
+            <div class="divider"><span>OR</span></div>
+
+            <p class="register-text">
+                Don't have an account?
+                <a href="{% url 'register' %}">Register here</a>
+            </p>
+        </section>
+    </main>
+
+    <script>
+        const email = document.getElementById("email");
+        const password = document.getElementById("password");
+
+        email.addEventListener("input", () => {
+            const feedback = document.getElementById("emailFeedback");
+
+            if (email.validity.valid) {
+                feedback.textContent = "✓ Looks good!";
+                feedback.className = "feedback success";
+            } else {
+                feedback.textContent = "Enter a valid email address.";
+                feedback.className = "feedback error";
+            }
+        });
+
+        password.addEventListener("input", () => {
+            const feedback = document.getElementById("passwordFeedback");
+
+            if (password.value.length >= 6) {
+                feedback.textContent = "✓ Password looks good!";
+                feedback.className = "feedback success";
+            } else {
+                feedback.textContent = "Password must contain at least 6 characters.";
+                feedback.className = "feedback error";
+            }
+        });
+
+        function togglePassword() {
+            const icon = document.getElementById("passwordIcon");
+            password.type = password.type === "password" ? "text" : "password";
+            icon.classList.toggle("bx-hide");
+            icon.classList.toggle("bx-show");
+        }
+
+        document.getElementById("loginForm").addEventListener("submit", function () {
+            document.getElementById("loginButton").disabled = true;
+            document.getElementById("loginButton").querySelector("span").textContent = "Logging in...";
+        });
+    </script>
+</body>
+</html>

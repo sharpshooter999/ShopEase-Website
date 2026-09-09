@@ -1,0 +1,178 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 45px 20px;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #e8edff, #fff1fb);
+    color: #18213d;
+}
+
+.welcome {
+    text-align: center;
+}
+
+.icon-shield {
+    padding: 8px;
+    color: #7046e8;
+    font-size: 55px;
+    filter: drop-shadow(0 5px 8px #9c83ff);
+}
+
+.welcome h1 {
+    margin: 12px 0;
+    font-size: 42px;
+}
+
+.welcome p {
+    margin: 0;
+    color: #5c6685;
+    font-size: 20px;
+}
+
+.welcome span {
+    display: block;
+    width: 105px;
+    height: 3px;
+    margin: 15px auto 28px;
+    background: linear-gradient(90deg, #3188ff, #d844d9);
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    gap: 34px;
+    max-width: 700px;
+    margin: auto;
+}
+
+.box {
+    position: relative;
+    width: 330px;
+    padding: 65px 35px 40px;
+    overflow: hidden;
+    text-align: center;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 15px 30px rgba(71, 91, 170, 0.18);
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.box::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 75px;
+    height: 65px;
+    content: "";
+    border-radius: 0 0 70px 0;
+}
+
+.user::before {
+    background: #1760f5;
+}
+
+.admin::before {
+    right: 0;
+    left: auto;
+    border-radius: 0 0 0 70px;
+    background: #e52b45;
+}
+
+.box:hover {
+    transform: translateY(-10px);
+}
+
+.role-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 82px;
+    height: 82px;
+    border-radius: 50%;
+    color: white;
+    font-size: 52px;
+}
+
+.user .role-icon {
+    background: #1760f5;
+    box-shadow: 0 0 0 20px #edf3ff;
+}
+
+.admin .role-icon {
+    background: #e52b45;
+    box-shadow: 0 0 0 20px #fff0f2;
+}
+
+.box h2 {
+    margin: 42px 0 10px;
+    font-size: 27px;
+}
+
+.box p {
+    min-height: 48px;
+    color: #5c6685;
+    line-height: 1.5;
+}
+
+.box button {
+    width: 100%;
+    margin-top: 25px;
+    padding: 16px;
+    border: 0;
+    border-radius: 7px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.user button {
+    background: #1760f5;
+}
+
+.admin button {
+    background: #e52b45;
+}
+
+.box button i {
+    margin-right: 8px;
+    padding: 3px;
+    border-radius: 50%;
+    background: white;
+    color: inherit;
+    font-size: 18px;
+    vertical-align: middle;
+}
+
+.loading {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(20, 25, 60, 0.65);
+    color: white;
+    font-size: 22px;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.loading.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+@media (max-width: 750px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .welcome h1 {
+        font-size: 34px;
+    }
+}

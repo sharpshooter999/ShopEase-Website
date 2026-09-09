@@ -1,0 +1,42 @@
+{% load static %}
+
+<section id="featured" class="container my-5 pt-4">
+  <div class="text-center mb-4">
+    <h3>You May Also Like</h3>
+    <hr class="mx-auto">
+    <p>Explore more products from this collection.</p>
+  </div>
+  <div class="row">
+    {% if recommendation_group == 'combos' %}
+      {% if current_product != 1 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product1' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/men-01.jpg' %}" alt="Casual clothing combo"><h5>Casual Combo</h5><h4>₹900.00</h4></a>{% endif %}
+      {% if current_product != 2 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product2' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/men-02.jpg' %}" alt="Smart clothing combo"><h5>Smart Combo</h5><h4>₹850.00</h4></a>{% endif %}
+      {% if current_product != 3 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product3' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/men-03.jpg' %}" alt="Everyday clothing combo"><h5>Everyday Combo</h5><h4>₹750.00</h4></a>{% endif %}
+      {% if current_product != 4 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product4' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/selling-products4.jpg' %}" alt="Premium clothing combo"><h5>Premium Combo</h5><h4>₹899.00</h4></a>{% endif %}
+    {% elif recommendation_group == 'dresses' %}
+      {% if current_product != 5 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product5' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/women-01.jpg' %}" alt="Floral dress"><h5>Floral Dress</h5><h4>₹999.00</h4></a>{% endif %}
+      {% if current_product != 6 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product6' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/women-02.jpg' %}" alt="Casual dress"><h5>Casual Dress</h5><h4>₹1499.00</h4></a>{% endif %}
+      {% if current_product != 7 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product7' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/women-03.jpg' %}" alt="Printed dress"><h5>Printed Dress</h5><h4>₹1099.00</h4></a>{% endif %}
+      {% if current_product != 8 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product8' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/category_11.png' %}" alt="Statement dress"><h5>Statement Dress</h5><h4>₹1299.00</h4></a>{% endif %}
+    {% elif recommendation_group == 'shirts' %}
+      {% if current_product != 9 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product9' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/shirt-4.png' %}" alt="Blue casual shirt"><h5>Blue Casual Shirt</h5><h4>₹499.00</h4></a>{% endif %}
+      {% if current_product != 10 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product10' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/shirt-6.png' %}" alt="Patterned casual shirt"><h5>Patterned Shirt</h5><h4>₹499.00</h4></a>{% endif %}
+      {% if current_product != 11 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product11' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/shirt-1.png' %}" alt="Classic button-down shirt"><h5>Classic Shirt</h5><h4>₹499.00</h4></a>{% endif %}
+      {% if current_product != 12 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product12' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/shirt-8.png' %}" alt="Modern casual shirt"><h5>Modern Shirt</h5><h4>₹499.00</h4></a>{% endif %}
+    {% elif recommendation_group == 'tshirts' %}
+      {% if current_product != 13 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product13' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/123.jpg' %}" alt="Classic cotton T-shirt"><h5>Classic T-shirt</h5><h4>₹299.00</h4></a>{% endif %}
+      {% if current_product != 14 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product14' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/red-tshirt.png' %}" alt="Red casual T-shirt"><h5>Red T-shirt</h5><h4>₹299.00</h4></a>{% endif %}
+      {% if current_product != 15 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product15' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/purple-tshirt.png' %}" alt="Purple casual T-shirt"><h5>Purple T-shirt</h5><h4>₹299.00</h4></a>{% endif %}
+      {% if current_product != 16 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product16' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/white-tshirt.png' %}" alt="White casual T-shirt"><h5>White T-shirt</h5><h4>₹299.00</h4></a>{% endif %}
+    {% elif recommendation_group == 'watches' %}
+      {% if current_product != 17 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product17' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/watch1.jpg' %}" alt="Classic wrist watch"><h5>Classic Watch</h5><h4>₹150.00</h4></a>{% endif %}
+      {% if current_product != 18 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product18' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/watch2.jpg' %}" alt="Silver wrist watch"><h5>Silver Watch</h5><h4>₹250.00</h4></a>{% endif %}
+      {% if current_product != 19 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product19' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/watch3.jpg' %}" alt="Premium wrist watch"><h5>Premium Watch</h5><h4>₹299.00</h4></a>{% endif %}
+      {% if current_product != 20 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product20' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/watch4.jpg' %}" alt="Designer wrist watch"><h5>Designer Watch</h5><h4>₹199.00</h4></a>{% endif %}
+    {% elif recommendation_group == 'shoes' %}
+      {% if current_product != 21 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product21' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/shoe-1.png' %}" alt="Classic casual shoes"><h5>Classic Shoes</h5><h4>₹899.00</h4></a>{% endif %}
+      {% if current_product != 22 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product22' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/shoe-2.png' %}" alt="White sneakers"><h5>White Sneakers</h5><h4>₹999.00</h4></a>{% endif %}
+      {% if current_product != 23 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product23' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/shoe-5.png' %}" alt="Sport running shoes"><h5>Running Shoes</h5><h4>₹1099.00</h4></a>{% endif %}
+      {% if current_product != 24 %}<a class="col-lg-4 col-md-6 col-12 mb-4 text-center text-decoration-none text-dark" href="{% url 'product24' %}"><img class="img-fluid mb-3 recommended-product-image" src="{% static 'images/shoe-8.png' %}" alt="Modern athletic shoes"><h5>Athletic Shoes</h5><h4>₹1099.00</h4></a>{% endif %}
+    {% endif %}
+  </div>
+</section>

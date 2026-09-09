@@ -1,0 +1,76 @@
+from django.urls import path
+from .import views
+from django.contrib import admin
+from django.urls import path
+from .views import register, login, logout,request_password_reset, reset_password_confirm,contactus ,admin_dashboard, add_product, delete_product_view,update_password 
+from .views import save_delivery_address, delete_delivery_address, search_products
+
+
+urlpatterns = [
+    
+    path('', views.project2_view, name='project2'),
+    path('admin', admin.site.urls),
+    path('user/', views.user, name='user'),
+    path('frontend/', views.frontend, name='frontend'),
+    path('shop', views.shop, name='shop'),
+    path("contactus/", contactus, name="contactus"),
+    path('cart', views.cart, name='cart'),
+    # path('product1/', views.product1, name='product1'),
+    path('product/<int:product_id>/', views.product_detail, name='product_detail'),
+    path('product1/',views.product1, name='product1'),
+    path('product2/', views.product2, name='product2'),
+    path('product3/', views.product3, name='product3'),
+    path('product4/', views.product4, name='product4'),
+    path('product5/', views.product5, name='product5'),
+    path('product6/', views.product6, name='product6'),
+    path('product7/', views.product7, name='product7'),
+    path('product8/', views.product8, name='product8'),
+    path('product9/', views.product9, name='product9'),
+    path('product10/', views.product10, name='product10'),
+    path('product11/', views.product11, name='product11'),
+    path('product12/', views.product12, name='product12'),
+    path('product13/', views.product13, name='product13'),
+    path('product14/', views.product14, name='product14'),
+    path('product15/', views.product15, name='product15'),
+    path('product16/', views.product16, name='product16'),
+    path('product17/', views.product17, name='product17'),
+    path('product18/', views.product18, name='product18'),
+    path('product19/', views.product19, name='product19'),
+    path('product20/', views.product20, name='product20'),
+    path('product21/', views.product21, name='product21'),
+    path('product22/', views.product22, name='product22'),
+    path('product23/', views.product23, name='product23'),
+    path('product24/', views.product24, name='product24'),
+    path("Address/", views.address, name="address"),
+    path(
+        "save-address/",
+        views.save_delivery_address,
+        name="save_delivery_address",
+    ),
+    path(
+        "delete-address/<str:address_id>/",
+        delete_delivery_address,
+        name="delete_delivery_address",
+    ),
+    path('payment/', views.payment, name='payment'),
+    path('orders/', views.orders, name='orders'),
+    path('orders/<str:order_id>/cancel/', views.cancel_order, name='cancel_order'),
+    path('orders/<str:order_id>/return/<int:item_index>/', views.return_order_item, name='return_order_item'),
+    path('orders/<str:order_id>/track/', views.track_order, name='track_order'),
+    path('orders/<str:order_id>/invoice/', views.download_invoice, name='download_invoice'),
+    
+    path("register/", register, name="register"),
+    path("login/", login, name="login"),
+    path("logout/", logout, name="logout"),
+    #  path("forgot-password/",forgot_password, name="forgot_password"),
+    # path("password-reset/request/", request_password_reset, name="request_password_reset"),
+    # path("password-reset/verify-otp/", verify_otp, name="verify_otp"),
+    # path("password-reset/reset/", reset_password, name="reset_password"),
+    path('password-reset/', request_password_reset, name='password_reset_request'),
+    path('password-reset-confirm/<uidb64>/<token>/', reset_password_confirm, name='password_reset_confirm'),
+    path("admin-dashboard/", admin_dashboard, name="admin_dashboard"),
+    path("add-product/", add_product, name="add_product"),
+    path("delete-product/<str:product_id>/", delete_product_view, name="delete_product"),
+     path("update-password/",update_password , name="update_password"),
+     path('search/', search_products, name='search_products'),
+]

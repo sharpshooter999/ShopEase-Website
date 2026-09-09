@@ -1,0 +1,228 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details</title>
+    <link rel="stylesheet" href="{% static 'css/frontend.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+      #cart-popup {
+          position: absolute;
+          background: green;
+          color: white;
+          padding: 5px 15px;
+          border-radius: 5px;
+          font-size: 14px;
+          z-index: 1000;
+          display: none; /* Initially hidden */
+      }
+      
+      
+        </style>
+  </head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-white py-3 fixed-top">
+    <div class="container-fluid">
+      <span class="brand-mark" aria-label="ShopEase"><img class="brand-logo" src="{% static 'images/logo1.png' %}" alt="ShopEase logo"><span class="brand-title">ShopEase</span></span>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i id="bar" class='bx bx-menu'></i></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'frontend' %}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'shop' %}">Shop</a>
+          </li>
+            <li class="nav-item">
+            <a class="nav-link" href="{% url 'contactus' %}">Contact Us</a>
+          </li>
+          <!-- <li class="nav-item">
+            <div class="container my-4">
+              <div class="input-group" style="max-width: 500px; margin: auto; position: relative;">
+                <input 
+                  id="product-search" 
+                  class="form-control" 
+                  type="text" 
+                  placeholder="Search" 
+                  style="border-radius: 20px; padding-right: 40px;">
+                <i 
+                  class="bx bx-search" 
+                  style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); font-size: 18px; color: #aaa; cursor: pointer;">
+                </i>
+              </div>
+            </div>            
+          </li> -->
+          <li class="nav-item">
+            <a href="{% url 'cart' %}" class="nav-link mx-2" style="position: relative;">
+              <i id="cart-icon" class='bx bxs-shopping-bag'></i>
+              <span id="cart-count" class="badge badge-danger" style="position: absolute; top: 5px; right: 5px; display: none;">0</span>
+              <div id="cart-popup" class="alert alert-success">Product added to cart!</div>
+            </a>                    
+          </li>
+          <li class="nav-item"><a href="{% url 'orders' %}" class="nav-link mx-2" aria-label="My orders" title="My orders"><i class="bx bx-receipt"></i></a></li>
+          <li class="nav-item"><a href="{% url 'user' %}" class="nav-link mx-2 profile-link" aria-label="User profile" title="User profile"><i class="bx bxs-user-circle"></i></a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <section class="container sproduct my-5 pt-5">
+    <div class="row mt-5">
+        <div class="col-lg-5 col-md-12">
+            <img id="MainImg" class="img-fluid w-100 pb-1" src="{%static 'images/watch1.jpg'%}" alt="Product Image">
+        </div>
+
+        <div class="col-lg-6 col-md-12">
+            <h6>Home / Watches</h6>
+            <h3 class="py-4">Watches</h3>
+            <h2>₹150.00</h2>
+            <div class="my-3">
+                <select class="form-control w-50">
+                    <option value="">Select Size</option>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                    <option value="XXL">XXL</option>
+                </select>
+            </div>
+            <div class="d-flex align-items-center">
+                <input type="number" class="form-control w-25 mr-2" value="1" min="1">
+                <button class="btn btn-danger" onclick="addToCart('Men\'s Fashion Combos', 850)">Add To Cart</button>
+                <button class="btn btn-success ml-2" onclick="buyNow('Men\'s Fashion Combos', 850)">Buy Now</button>
+            </div>
+            <h4 class="mt-5">Product Details</h4>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sed bibendum lorem. Integer nec nibh nisl.</p>
+        </div>
+    </div>
+</section>
+
+{% include 'keyur/_recommended_products.html' with recommendation_group='watches' current_product=17 %}
+
+
+  <script>
+    function updateMainImg(img) {
+        document.getElementById('MainImg').src = img.src;
+    }
+    function addToCart(productName, productPrice) {
+    const productImage = document.getElementById('MainImg').src; 
+    let cart = JSON.parse(localStorage.getItem("cart_{{ request.session.user_id|default:'guest' }}")) || [];
+    cart.push({ name: productName, price: productPrice, image: productImage }); 
+    localStorage.setItem("cart_{{ request.session.user_id|default:'guest' }}", JSON.stringify(cart));
+    alert(`${productName} added to cart!`);
+    updateCartCount();
+}
+
+
+
+    function buyNow(productName, productPrice) {
+        window.location.href = `{% url 'address' %}?product=${encodeURIComponent(productName)}&price=${encodeURIComponent(productPrice)}`;
+    }
+
+    function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem("cart_{{ request.session.user_id|default:'guest' }}")) || [];
+        const cartCount = document.getElementById('cart-count');
+        cartCount.textContent = cart.length;
+        cartCount.style.display = cart.length ? 'block' : 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', updateCartCount);
+
+    document.addEventListener('DOMContentLoaded', () => {
+    fetch('products.json')
+        .then(response => response.json())
+        .then(data => {
+            renderProduct(data[0]); // Render the first product by default
+            renderRelatedProducts(data);
+        })
+        .catch(error => console.error('Error fetching product data:', error));
+});
+
+function renderProduct(product) {
+    document.querySelector('.sproduct h3').textContent = product.name;
+    document.querySelector('.sproduct h2').textContent = `₹${product.price}`;
+    document.querySelector('#MainImg').src = product.image;
+    document.querySelector('.sproduct p').textContent = product.details;
+
+    const sizeSelect = document.querySelector('.sproduct select');
+    sizeSelect.innerHTML = '<option value="">Select Size</option>';
+    product.sizeOptions.forEach(size => {
+        const option = document.createElement('option');
+        option.value = size;
+        option.textContent = size;
+        sizeSelect.appendChild(option);
+    });
+
+    // Update Add to Cart and Buy Now buttons
+    const addToCartButton = document.querySelector('.sproduct .btn-danger');
+    const buyNowButton = document.querySelector('.sproduct .btn-success');
+
+    addToCartButton.onclick = () => addToCart(product.name, product.price);
+    buyNowButton.onclick = () => buyNow(product.name, product.price);
+}
+
+function renderRelatedProducts(products) {
+    const relatedContainer = document.querySelector('#featured .row');
+    relatedContainer.innerHTML = ''; // Clear existing related products
+
+    products.forEach(product => {
+        const productDiv = document.createElement('div');
+        productDiv.className = 'col-lg-3 col-md-4 col-12 text-center';
+
+        productDiv.innerHTML = `
+            <img src="${product.image}" class="img-fluid mb-3" alt="${product.name}">
+            <h5>${product.name}</h5>
+            <h4>₹${product.price}</h4>
+            <button class="btn btn-primary" onclick="buyNow('${product.name}', ${product.price})">Buy Now</button>
+        `;
+
+        relatedContainer.appendChild(productDiv);
+    });
+}
+
+window.onload = function () {
+    const cartIcon = document.getElementById('cart-icon');
+    const cartPopup = document.getElementById('cart-popup');
+
+    if (cartIcon) {
+        const rect = cartIcon.getBoundingClientRect();
+        cartPopup.style.position = 'absolute';
+        cartPopup.style.top = rect.top + window.scrollY + 'px';
+        cartPopup.style.left = rect.left + window.scrollX + 'px';
+    }
+};
+
+function showCartPopup() {
+    const cartIcon = document.getElementById('cart-icon');
+    const cartPopup = document.getElementById('cart-popup');
+
+    if (cartIcon && cartPopup) {
+        const rect = cartIcon.getBoundingClientRect();
+        cartPopup.style.top = `${rect.top + window.scrollY - 30}px`;  // Position slightly above the icon
+        cartPopup.style.left = `${rect.left + window.scrollX}px`;
+        cartPopup.style.display = 'block';  // Make it always visible
+    }
+}
+
+// Call function on page load to ensure correct positioning
+window.onload = function () {
+    showCartPopup();
+};
+
+// Ensure popup updates on window resize
+window.addEventListener('resize', showCartPopup);
+
+
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+</body>
+</html>
