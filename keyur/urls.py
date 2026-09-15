@@ -53,6 +53,7 @@ urlpatterns = [
         name="delete_delivery_address",
     ),
     path('payment/', views.payment, name='payment'),
+    path('payment/success/<str:order_id>/', views.payment_success, name='payment_success'),
     path('orders/', views.orders, name='orders'),
     path('orders/<str:order_id>/cancel/', views.cancel_order, name='cancel_order'),
     path('orders/<str:order_id>/return/<int:item_index>/', views.return_order_item, name='return_order_item'),

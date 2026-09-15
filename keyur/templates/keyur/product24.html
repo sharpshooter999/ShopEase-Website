@@ -107,14 +107,16 @@
 {% include 'keyur/_recommended_products.html' with recommendation_group='shoes' current_product=24 %}
 
 
+  <script src="{% static 'js/navigation.js' %}"></script>
   <script>
     function updateMainImg(img) {
         document.getElementById('MainImg').src = img.src;
     }
     function addToCart(productName, productPrice) {
     const productImage = document.getElementById('MainImg').src; 
+    const size = getSelectedProductSize(document.querySelector('.sproduct'));
     let cart = JSON.parse(localStorage.getItem("cart_{{ request.session.user_id|default:'guest' }}")) || [];
-    cart.push({ name: productName, price: productPrice, image: productImage }); 
+    cart.push({ name: productName, price: productPrice, image: productImage, size, quantity: 1 }); 
     localStorage.setItem("cart_{{ request.session.user_id|default:'guest' }}", JSON.stringify(cart));
     alert(`${productName} added to cart!`);
     updateCartCount();

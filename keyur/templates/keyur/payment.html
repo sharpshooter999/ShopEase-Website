@@ -103,13 +103,13 @@
             <div>
               <div class="method-panel active" data-method="card">
                                 <h2 class="h5">Card details</h2>
-                                <div class="form-group"><label for="cardNumber">Card number</label><input class="form-control" id="cardNumber" type="text" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456"></div>
-                                <div class="form-row"><div class="form-group col-sm-6"><label for="expiry">Expiry date</label><input class="form-control" id="expiry" type="text" autocomplete="cc-exp" placeholder="MM / YY"></div><div class="form-group col-sm-6"><label for="cvv">CVV</label><input class="form-control" id="cvv" type="password" inputmode="numeric" autocomplete="cc-csc" placeholder="3 digits"></div></div>
-                <p class="secure-note"><i class="bx bx-lock-alt"></i> Card details are used only for this payment.</p>
+                                <div class="form-group"><label for="cardNumber">Card number</label><input class="form-control" id="cardNumber" name="card_number" type="text" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456" maxlength="19"></div>
+                                <div class="form-row"><div class="form-group col-sm-6"><label for="expiry">Expiry date</label><input class="form-control" id="expiry" name="expiry" type="text" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/YYYY" maxlength="7" pattern="(0[1-9]|1[0-2])/[0-9]{4}"></div><div class="form-group col-sm-6"><label for="cvv">CVV</label><input class="form-control" id="cvv" name="cvv" type="password" inputmode="numeric" autocomplete="cc-csc" placeholder="3 digits" maxlength="3" pattern="[0-9]{3}"></div></div>
+                <p class="secure-note"><i class="bx bx-info-circle"></i> Demo checkout: no real card, bank, or payment verification is performed.</p>
               </div>
-              <div class="method-panel" data-method="upi"><h2 class="h5">UPI details</h2><div class="form-group"><label for="upiId">UPI ID</label><input class="form-control" id="upiId" type="text" placeholder="name@bank"></div><p class="secure-note">You will approve the payment in your UPI app.</p></div>
-                            <div class="method-panel" data-method="net_banking"><h2 class="h5">Net banking</h2><div class="form-group"><label for="bank">Select your bank</label><select class="form-control" id="bank"><option>Choose a bank</option><option>State Bank of India</option><option>HDFC Bank</option><option>ICICI Bank</option><option>Axis Bank</option></select></div><p class="secure-note">You will be redirected to your bank to finish securely.</p></div>
-                            <div class="method-panel" data-method="cod"><h2 class="h5">Cash on delivery</h2><p>Your order will be paid for when it arrives.</p></div>
+              <div class="method-panel" data-method="upi"><h2 class="h5">UPI details</h2><div class="form-group"><label for="upiId">UPI ID</label><input class="form-control" id="upiId" name="upi_id" type="text" inputmode="email" placeholder="9876543210@bank" maxlength="30" pattern="[0-9]{10}@[A-Za-z]{2,}"></div><p class="secure-note">Use your 10-digit phone number followed by your bank handle.</p></div>
+                            <div class="method-panel" data-method="net_banking"><h2 class="h5">Net banking</h2><div class="form-group"><label for="bank">Select your bank</label><select class="form-control" id="bank" name="bank"><option value="">Choose a bank</option><option value="State Bank of India">State Bank of India</option><option value="HDFC Bank">HDFC Bank</option><option value="ICICI Bank">ICICI Bank</option><option value="Axis Bank">Axis Bank</option></select></div><p class="secure-note">You will be redirected to your bank to finish securely.</p></div>
+                            <div class="method-panel" data-method="cod"><h2 class="h5">Cash on delivery</h2><p>Your order will be placed now and paid for when it arrives.</p></div>
                             <button type="submit" class="pay-button">Continue securely</button>
             </div>
           </div>
@@ -126,6 +126,11 @@
     const couponMessage = document.getElementById('couponMessage');
     const couponRates = { SHOPEASE10: { type: 'percent', value: 10 }, WELCOME5: { type: 'percent', value: 5 }, SAVE200: { type: 'flat', value: 200 } };
     let appliedCoupon = '';
+    if (couponCode && couponCode.value.trim().toUpperCase() in couponRates) {
+      appliedCoupon = couponCode.value.trim().toUpperCase();
+      if (appliedCouponCode) appliedCouponCode.value = appliedCoupon;
+      if (applyCoupon) applyCoupon.textContent = 'Applied';
+    }
     function updateCouponPreview() {
       if (!couponCode) return;
       const items = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
@@ -147,6 +152,17 @@
       if (applyCoupon) applyCoupon.textContent = 'Apply coupon';
       updateCouponPreview();
     });
+    if (couponCode) couponCode.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        if (applyCoupon) applyCoupon.click();
+      }
+    });
+    const expiryInput = document.getElementById('expiry');
+    if (expiryInput) expiryInput.addEventListener('input', function () {
+      const digits = this.value.replace(/\D/g, '').slice(0, 6);
+      this.value = digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+    });
     if (applyCoupon) applyCoupon.addEventListener('click', function () {
       const code = couponCode.value.trim().toUpperCase();
       if (!couponRates[code]) {
@@ -162,8 +178,9 @@
       }
       updateCouponPreview();
     });
+    const checkoutStorageKey = `${cartStorageKey}_checkout`;
     if (cartItemsInput) {
-      cartItemsInput.value = localStorage.getItem(cartStorageKey) || '[]';
+      cartItemsInput.value = localStorage.getItem(checkoutStorageKey) || localStorage.getItem(cartStorageKey) || '[]';
       updateCouponPreview();
     } else if ({{ payment_complete|yesno:'true,false' }}) {
       localStorage.removeItem("{{ cart_storage_key }}");
@@ -176,11 +193,27 @@
     }
     const options = document.querySelectorAll('.method-option');
     const panels = document.querySelectorAll('.method-panel');
+    const paymentFields = {
+      card: ['cardNumber', 'expiry', 'cvv'],
+      upi: ['upiId'],
+      net_banking: ['bank'],
+      cod: [],
+    };
+    function updatePaymentFields(method) {
+      Object.entries(paymentFields).forEach(([fieldMethod, fieldIds]) => {
+        fieldIds.forEach((fieldId) => {
+          const field = document.getElementById(fieldId);
+          if (field) field.required = fieldMethod === method;
+        });
+      });
+    }
     options.forEach((option) => option.addEventListener('click', () => {
       const method = option.querySelector('input').value;
       options.forEach((item) => item.classList.toggle('selected', item === option));
       panels.forEach((panel) => panel.classList.toggle('active', panel.dataset.method === method));
+      updatePaymentFields(method);
     }));
+    updatePaymentFields(document.querySelector('input[name="payment_method"]:checked').value);
   </script>
 </body>
 </html>

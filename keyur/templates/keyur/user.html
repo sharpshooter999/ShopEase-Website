@@ -84,6 +84,7 @@
             <a href="{% url 'address' %}" class="btn">Add or update delivery details</a>
         </div>
     </main>
+    <script src="{% static 'js/navigation.js' %}"></script>
 </body>
 <script>
     const cartStorageKey = "cart_{{ request.session.user_id|default:'guest' }}";

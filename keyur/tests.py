@@ -3,7 +3,7 @@ from django.urls import reverse
 
 from keyur.cart_utils import normalize_cart_quantity
 from keyur.models import Product
-from keyur.views import get_related_products
+from keyur.views import get_related_products, validate_payment_details
 
 
 class CartQuantityValidationTests(SimpleTestCase):
@@ -12,6 +12,48 @@ class CartQuantityValidationTests(SimpleTestCase):
         self.assertEqual(normalize_cart_quantity(5, 4, 5), 5)
         self.assertEqual(normalize_cart_quantity(1, 3, 5), 4)
         self.assertEqual(normalize_cart_quantity(0, 2, 5), 2)
+
+
+class PaymentValidationTests(SimpleTestCase):
+    def test_card_details_require_bounded_values(self):
+        self.assertEqual(
+            validate_payment_details("card", {
+                "card_number": "123456789012",
+                "expiry": "12/2030",
+                "cvv": "123",
+            }),
+            "",
+        )
+        self.assertIn("card number", validate_payment_details("card", {
+            "card_number": "123",
+            "expiry": "12/2030",
+            "cvv": "123",
+        }))
+
+    def test_other_payment_methods_require_their_details(self):
+        self.assertIn("UPI", validate_payment_details("upi", {"upi_id": "invalid"}))
+        self.assertEqual(validate_payment_details("upi", {"upi_id": "9876543210@bank"}), "")
+        self.assertIn("bank", validate_payment_details("net_banking", {"bank": ""}))
+        self.assertEqual(validate_payment_details("cod", {}), "")
+
+    def test_expiry_date_cannot_be_in_the_past(self):
+        self.assertIn("not passed", validate_payment_details("card", {
+            "card_number": "4111111111111111",
+            "expiry": "01/2020",
+            "cvv": "123",
+        }))
+
+    def test_cvv_must_be_exactly_three_digits(self):
+        self.assertEqual(validate_payment_details("card", {
+            "card_number": "123456789012",
+            "expiry": "12/2030",
+            "cvv": "123",
+        }), "")
+        self.assertIn("3 digit", validate_payment_details("card", {
+            "card_number": "123456789012",
+            "expiry": "12/2030",
+            "cvv": "1234",
+        }))
 
 
 class ManualRecommendationTests(TestCase):

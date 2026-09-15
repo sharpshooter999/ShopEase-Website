@@ -110,6 +110,7 @@
 
     </main>
 
+    <script src="{% static 'js/navigation.js' %}"></script>
     <script>
         function getCart() {
             return JSON.parse(localStorage.getItem("cart_{{ request.session.user_id|default:'guest' }}")) || [];

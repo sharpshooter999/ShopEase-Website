@@ -165,6 +165,7 @@
     </div>
   </section>
 
+  <script src="{% static 'js/navigation.js' %}"></script>
   <script>
    const cartContainer = document.querySelector("#cart-items");
    const cartStorageKey = "cart_{{ request.session.user_id|default:'guest' }}";
@@ -188,6 +189,12 @@
      if (!cartContainer) return;
      cartContainer.innerHTML = "";
 
+     cart.forEach((item) => {
+       if (!item.size || item.size === 'One Size') {
+         item.size = 'S';
+       }
+     });
+
      if (cart.length === 0) {
        cartContainer.innerHTML = "<p>Your cart is empty.</p>";
        updateCartCount();
@@ -204,16 +211,16 @@
        }
        totalPrice += (parseFloat(item.price || 0) * safeQuantity);
 
-       const cartItemHTML = `
+      const cartItemHTML = `
          <div class="cart-item">
            <img src="${item.image}" alt="${item.name}" class="cart-item-image">
            <div class="cart-item-details">
              <h5 class="cart-item-name">${item.name}</h5>
-             <p class="cart-item-price">Price: ₹${item.price || 0} · Size: ${item.size || 'One Size'} · Quantity: ${safeQuantity}</p>
+             <p class="cart-item-price">Price: ₹${item.price || 0} · Size: ${item.size || 'Size not selected'} · Quantity: ${safeQuantity}</p>
            </div>
            <button class="buy-btn quantity-btn" data-index="${index}" data-change="-1" aria-label="Decrease quantity">−</button>
            <button class="buy-btn quantity-btn" data-index="${index}" data-change="1" aria-label="Increase quantity">+</button>
-           <button class="buy-btn" onclick="window.location.href='{% url 'address' %}'">Buy Now</button>
+           <button class="buy-btn buy-one-btn" data-index="${index}">Buy this</button>
            <button class="remove-btn" data-index="${index}">Remove</button>
          </div>
          <hr>
@@ -226,8 +233,36 @@
      cartContainer.innerHTML += `
        <div class="cart-total">
          <h4>Total Price: ₹${totalPrice.toFixed(2)}</h4>
+         <button class="buy-btn buy-all-btn">Buy all</button>
        </div>
      `;
+
+     document.querySelectorAll(".buy-one-btn").forEach((button) => {
+       button.addEventListener("click", function () {
+         const currentCart = getCart();
+         const selectedItem = currentCart[Number(this.dataset.index)];
+         if (!selectedItem.size || selectedItem.size === 'One Size') {
+           alert('Please select a size before buying this product.');
+           return;
+         }
+         localStorage.setItem(`${cartStorageKey}_checkout`, JSON.stringify([selectedItem]));
+         window.location.href = "{% url 'address' %}";
+       });
+     });
+
+     const buyAllButton = document.querySelector(".buy-all-btn");
+     if (buyAllButton) {
+       buyAllButton.addEventListener("click", function () {
+         const currentCart = getCart();
+         if (currentCart.some((item) => !item.size || item.size === 'One Size')) {
+           alert('Please select a size for every product before buying all.');
+           return;
+         }
+         localStorage.setItem(`${cartStorageKey}_checkout`, JSON.stringify(currentCart));
+         window.location.href = "{% url 'address' %}";
+       });
+     }
+
 
      document.querySelectorAll(".remove-btn").forEach((button) => {
        button.addEventListener("click", function () {

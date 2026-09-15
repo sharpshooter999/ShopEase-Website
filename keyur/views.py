@@ -265,6 +265,32 @@ def address(request):
         "selected_address_id": selected_address.get("id", ""),
     })
 
+
+def validate_payment_details(payment_method, post_data):
+    if payment_method == "card":
+        card_number = re.sub(r"\D", "", post_data.get("card_number", ""))
+        expiry = post_data.get("expiry", "").replace(" ", "").strip()
+        cvv = post_data.get("cvv", "").strip()
+        if not 12 <= len(card_number) <= 19:
+            return "Enter a valid card number with 12 to 19 digits."
+        expiry_match = re.fullmatch(r"(0[1-9]|1[0-2])/([0-9]{4})", expiry)
+        if not expiry_match:
+            return "Enter the expiry date in MM/YYYY format."
+        expiry_month = int(expiry_match.group(1))
+        expiry_year = int(expiry_match.group(2))
+        current_date = datetime.utcnow()
+        if (expiry_year, expiry_month) < (current_date.year, current_date.month):
+            return "Enter an expiry date that has not passed."
+        if not re.fullmatch(r"\d{3}", cvv):
+            return "Enter a valid 3 digit CVV."
+    elif payment_method == "upi":
+        if not re.fullmatch(r"[0-9]{10}@[A-Za-z]{2,}", post_data.get("upi_id", "").strip()):
+            return "Enter a valid UPI ID with 10 digits, such as 9876543210@bank."
+    elif payment_method == "net_banking":
+        if not post_data.get("bank", "").strip():
+            return "Select your bank to continue."
+    return ""
+
 def payment(request):
     if "user_id" not in request.session:
         return redirect("login")
@@ -286,6 +312,13 @@ def payment(request):
         if payment_method not in allowed_methods:
             messages.error(request, "Please select a payment method.")
         else:
+            payment_error = validate_payment_details(payment_method, request.POST)
+            if payment_error:
+                messages.error(request, payment_error)
+                return render(request, "keyur/payment.html", {
+                    "selected_address": selected_address,
+                    "coupon_code": coupon_code,
+                })
             try:
                 items = json.loads(request.POST.get("cart_items", "[]"))
             except (TypeError, ValueError):
@@ -310,13 +343,22 @@ def payment(request):
             quantities = {}
             cart_lines = []
             for item in items:
+                legacy_price = 0
                 try:
                     product_id = int(item.get("product_id"))
                 except (TypeError, ValueError):
                     product_id = None
-                if product_id is None:
-                    messages.error(request, "Your cart contains an outdated product. Please add it again.")
-                    return redirect("cart")
+                if product_id is None or not Product.objects.filter(id=product_id).exists():
+                    product_id = None
+                    try:
+                        legacy_price = float(re.sub(r"[^0-9.]", "", str(item.get("price", "0"))))
+                    except (TypeError, ValueError):
+                        legacy_price = 0
+                    matching_product = Product.objects.filter(
+                        name=str(item.get("name", "")).strip(),
+                        price=legacy_price,
+                    ).first()
+                    product_id = matching_product.id if matching_product else None
                 try:
                     quantity = max(1, int(item.get("quantity", 1)))
                 except (TypeError, ValueError):
@@ -325,8 +367,12 @@ def payment(request):
                     "product_id": product_id,
                     "size": str(item.get("size", "One Size"))[:20],
                     "quantity": quantity,
+                    "name": str(item.get("name", "Product"))[:255],
+                    "price": legacy_price if product_id is None else 0,
+                    "image": str(item.get("image", "")),
                 })
-                quantities[product_id] = quantities.get(product_id, 0) + quantity
+                if product_id is not None:
+                    quantities[product_id] = quantities.get(product_id, 0) + quantity
 
             order_items = []
             total = 0
@@ -352,15 +398,15 @@ def payment(request):
                     product.save(update_fields=["stock"])
 
                 for line in cart_lines:
-                    product = products[line["product_id"]]
-                    price = float(product.price)
+                    product = products.get(line["product_id"]) if line["product_id"] is not None else None
+                    price = float(product.price) if product else line["price"]
                     order_items.append({
-                        "product_id": product.id,
-                        "name": product.name,
+                        "product_id": product.id if product else None,
+                        "name": product.name if product else line["name"],
                         "price": price,
                         "quantity": line["quantity"],
                         "size": line["size"],
-                        "image": product.image.url if product.image else "",
+                        "image": product.image.url if product and product.image else line["image"],
                     })
                     total += price * line["quantity"]
 
@@ -393,20 +439,46 @@ def payment(request):
             }
             saved_order = settings.ORDERS_COLLECTION.insert_one(order)
             order_id = str(saved_order.inserted_id)
-            messages.success(request, "Payment method selected successfully.")
-            return render(request, "keyur/payment.html", {
-                "selected_method": payment_method,
-                "selected_address": selected_address,
-                "coupon_code": coupon_code,
-                "discount": discount,
-                "total": final_total,
-                "order_id": order_id,
-                "cart_storage_key": f"cart_{request.session['user_id']}",
-                "payment_complete": True,
-            })
+            request.session["purchased_cart_items"] = [
+                {
+                    "product_id": item.get("product_id"),
+                    "name": item.get("name", ""),
+                    "price": item.get("price", ""),
+                    "size": item.get("size", "One Size"),
+                }
+                for item in items
+            ]
+            messages.success(request, "Payment completed successfully.")
+            return redirect("orders")
 
     return render(request, "keyur/payment.html", {
         "selected_address": selected_address,
+    })
+
+
+def payment_success(request, order_id):
+    if "user_id" not in request.session:
+        return redirect("login")
+
+    try:
+        order = settings.ORDERS_COLLECTION.find_one({
+            "_id": ObjectId(order_id),
+            "user_id": request.session["user_id"],
+        })
+    except Exception:
+        order = None
+    if not order:
+        return HttpResponse("Order not found", status=404)
+
+    return render(request, "keyur/payment.html", {
+        "selected_method": order.get("payment_method"),
+        "selected_address": order.get("address", {}),
+        "coupon_code": order.get("coupon_code", ""),
+        "discount": order.get("discount", 0),
+        "total": order.get("total", 0),
+        "order_id": order_id,
+        "cart_storage_key": f"cart_{request.session['user_id']}",
+        "payment_complete": True,
     })
 
 
@@ -424,7 +496,11 @@ def orders(request):
             {**item, "return_requested": index in returned_items}
             for index, item in enumerate(order.get("items", []))
         ]
-    return render(request, "keyur/orders.html", {"orders": user_orders})
+    purchased_cart_items = request.session.pop("purchased_cart_items", [])
+    return render(request, "keyur/orders.html", {
+        "orders": user_orders,
+        "purchased_cart_items_json": json.dumps(purchased_cart_items),
+    })
 
 
 def cancel_order(request, order_id):

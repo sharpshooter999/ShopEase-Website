@@ -62,7 +62,7 @@
           {% for item in order.items %}
             <div class="order-item">
               <span>{{ item.name }}</span>
-              <span class="item-actions"><strong>Rs. {{ item.price|floatformat:2 }}</strong>
+              <span class="item-actions"><strong>Rs. {{ item.price|floatformat:2 }}</strong> · Size: {{ item.size|default:"One Size" }}
                 {% if item.return_requested %}
                   <small class="text-warning ml-2">Return requested</small>
                 {% elif order.status != 'Cancelled' %}
@@ -98,10 +98,24 @@
   </main>
   <script>
     const cartStorageKey = "cart_{{ request.session.user_id|default:'guest' }}";
-    const cart = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
+    let cart = JSON.parse(localStorage.getItem(cartStorageKey) || '[]');
+    const purchasedItems = {{ purchased_cart_items_json|default:'[]'|safe }};
+    if (purchasedItems.length) {
+      const remainingCart = cart.filter(function (cartItem) {
+        return !purchasedItems.some(function (purchasedItem) {
+          return String(cartItem.product_id || '') === String(purchasedItem.product_id || '') &&
+            String(cartItem.name || '') === String(purchasedItem.name || '') &&
+            String(cartItem.size || 'One Size') === String(purchasedItem.size || 'One Size');
+        });
+      });
+      cart = remainingCart;
+      localStorage.setItem(cartStorageKey, JSON.stringify(remainingCart));
+      localStorage.removeItem(`${cartStorageKey}_checkout`);
+    }
     const cartCount = document.getElementById('cart-count');
     cartCount.textContent = cart.length;
     cartCount.style.display = cart.length ? 'block' : 'none';
   </script>
+  <script src="{% static 'js/navigation.js' %}"></script>
 </body>
 </html>
